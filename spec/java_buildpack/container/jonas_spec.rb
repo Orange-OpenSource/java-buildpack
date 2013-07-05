@@ -70,7 +70,6 @@ module JavaBuildpack::Container
 
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
-        application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
 
         Jonas.new(
           :app_dir => root,
@@ -88,9 +87,6 @@ module JavaBuildpack::Container
 
         server = File.join conf_dir, 'server.xml'
         expect(File.exists?(server)).to be_true
-
-        support = File.join tomcat_dir, 'lib', 'tomcat-buildpack-support.jar'
-        expect(File.exists?(support)).to be_true
       end
     end
 
