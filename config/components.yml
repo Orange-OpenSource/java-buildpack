@@ -17,8 +17,8 @@
 ---
 containers:
   - "JavaBuildpack::Container::Main"
-  - "JavaBuildpack::Container::Tomcat"
   - "JavaBuildpack::Container::Jonas"
+  - "JavaBuildpack::Container::Tomcat"
   - "JavaBuildpack::Container::Play"
 jres:
   - "JavaBuildpack::Jre::OpenJdk"
