@@ -14,7 +14,7 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'java_buildpack/container/tomcat'
+require 'java_buildpack/container/jonas'
 
 module JavaBuildpack::Container
 
@@ -38,15 +38,15 @@ module JavaBuildpack::Container
     it 'should detect WEB-INF' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
-      detected = Tomcat.new(
+      detected = Jonas.new(
           :app_dir => 'spec/fixtures/container_tomcat',
           :configuration => {}).detect
 
-      expect(detected).to eq('tomcat-7.0.40')
+      expect(detected).to eq('jonas-5.2.1')
     end
 
     it 'should not detect when WEB-INF is absent' do
-      detected = Tomcat.new(
+      detected = Jonas.new(
           :app_dir => 'spec/fixtures/container_main',
           :configuration => {}).detect
 
@@ -56,7 +56,7 @@ module JavaBuildpack::Container
     it 'should fail when a malformed version is detected' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JavaBuildpack::Util::TokenizedVersion.new('7.0.40_0')) if block }
         .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
-      expect { Tomcat.new(
+      expect { Jonas.new(
           :app_dir => 'spec/fixtures/container_tomcat',
           :configuration => {}).detect }.to raise_error(/Malformed\ Tomcat\ version/)
     end
@@ -72,7 +72,7 @@ module JavaBuildpack::Container
         application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
         application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
 
-        Tomcat.new(
+        Jonas.new(
           :app_dir => root,
           :configuration => { }
         ).compile
@@ -105,7 +105,7 @@ module JavaBuildpack::Container
         application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
         application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
 
-        Tomcat.new(
+        Jonas.new(
           :app_dir => root,
           :configuration => { }
         ).compile
@@ -132,7 +132,7 @@ module JavaBuildpack::Container
         application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
         application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
 
-        Tomcat.new(
+        Jonas.new(
           :app_dir => root,
           :lib_directory => lib_directory,
           :configuration => { }
@@ -159,7 +159,7 @@ module JavaBuildpack::Container
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
 
-      command = Tomcat.new(
+      command = Jonas.new(
         :app_dir => 'spec/fixtures/container_tomcat',
         :java_home => 'test-java-home',
         :java_opts => [ 'test-opt-2', 'test-opt-1' ],

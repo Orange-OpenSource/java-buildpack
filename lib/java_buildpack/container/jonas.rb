@@ -139,7 +139,7 @@ module JavaBuildpack::Container
     end
 
     def id(version)
-      "tomcat-#{version}"
+      "jonas-#{version}"
     end
 
     def link_application
