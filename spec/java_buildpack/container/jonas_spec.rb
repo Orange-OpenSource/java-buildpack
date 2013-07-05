@@ -20,9 +20,9 @@ module JavaBuildpack::Container
 
   describe Jonas do
 
-    TOMCAT_VERSION = JavaBuildpack::Util::TokenizedVersion.new('7.0.40')
+    JONAS_VERSION = JavaBuildpack::Util::TokenizedVersion.new('5.2.1')
 
-    TOMCAT_DETAILS = [TOMCAT_VERSION, 'test-tomcat-uri']
+    TOMCAT_DETAILS = [JONAS_VERSION, 'test-tomcat-uri']
 
     SUPPORT_VERSION = JavaBuildpack::Util::TokenizedVersion.new('1.0.+')
 
@@ -36,7 +36,7 @@ module JavaBuildpack::Container
     end
 
     it 'should detect WEB-INF' do
-      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
       detected = Tomcat.new(
           :app_dir => 'spec/fixtures/container_tomcat',
@@ -65,7 +65,7 @@ module JavaBuildpack::Container
       Dir.mktmpdir do |root|
         Dir.mkdir File.join(root, 'WEB-INF')
 
-        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
           .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
 
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
@@ -98,7 +98,7 @@ module JavaBuildpack::Container
       Dir.mktmpdir do |root|
         Dir.mkdir File.join(root, 'WEB-INF')
 
-        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
           .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
 
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
@@ -125,7 +125,7 @@ module JavaBuildpack::Container
 
         Dir['spec/fixtures/additional_libs/*'].each { |file| system "cp #{file} #{lib_directory}" }
 
-        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
           .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
 
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
@@ -156,7 +156,7 @@ module JavaBuildpack::Container
     end
 
     it 'should return command' do
-      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
 
       command = Tomcat.new(

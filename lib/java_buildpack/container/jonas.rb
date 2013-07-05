@@ -22,7 +22,7 @@ require 'java_buildpack/util/format_duration'
 
 module JavaBuildpack::Container
 
-  # Encapsulates the detect, compile, and release functionality for Tomcat applications.
+  # Encapsulates the detect, compile, and release functionality for Jonas applications.
   class Jonas
 
     # Creates an instance, passing in an arbitrary collection of options.
@@ -39,8 +39,8 @@ module JavaBuildpack::Container
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
-      @tomcat_version, @tomcat_uri = Tomcat.find_tomcat(@app_dir, @configuration)
-      @support_version, @support_uri = Tomcat.find_support(@app_dir, @configuration)
+      @jonas_version, @tomcat_uri = Jonas.find_tomcat(@app_dir, @configuration)
+      @support_version, @support_uri = Jonas.find_support(@app_dir, @configuration)
     end
 
     # Detects whether this application is a Tomcat application.
@@ -48,15 +48,14 @@ module JavaBuildpack::Container
     # @return [String] returns +tomcat-<version>+ if and only if the application has a +WEB-INF+ directory, otherwise
     #                  returns +nil+
     def detect
-      @tomcat_version ? id(@tomcat_version) : nil
+      @jonas_version ? id(@jonas_version) : nil
     end
 
     # Downloads and unpacks a Tomcat instance and support JAR
     #
     # @return [void]
     def compile
-      download_tomcat
-      download_support
+      download_jonas
       link_application
       link_libs
     end
@@ -91,23 +90,13 @@ module JavaBuildpack::Container
       system "cp -r #{File.join resources, '*'} #{tomcat_home}"
     end
 
-    def download_tomcat
+    def download_jonas
       download_start_time = Time.now
-      print "-----> Downloading Tomcat #{@tomcat_version} from #{@tomcat_uri} "
+      print "-----> Downloading Jonas #{@jonas_version} from #{@tomcat_uri} "
 
       JavaBuildpack::Util::ApplicationCache.new.get(@tomcat_uri) do |file|  # TODO Use global cache #50175265
         puts "(#{(Time.now - download_start_time).duration})"
         expand(file, @configuration)
-      end
-    end
-
-    def download_support
-      download_start_time = Time.now
-      print "-----> Downloading Buildpack Tomcat Support #{@support_version} from #{@support_uri} "
-
-      JavaBuildpack::Util::ApplicationCache.new.get(@support_uri) do |file|  # TODO Use global cache #50175265
-        system "cp #{file.path} #{File.join tomcat_home, 'lib', 'tomcat-buildpack-support.jar'}"
-        puts "(#{(Time.now - download_start_time).duration})"
       end
     end
 
