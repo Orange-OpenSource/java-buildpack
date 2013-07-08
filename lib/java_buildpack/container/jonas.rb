@@ -41,6 +41,7 @@ module JavaBuildpack::Container
       @configuration = context[:configuration]
       @jonas_version, @tomcat_uri = Jonas.find_tomcat(@app_dir, @configuration)
       @support_version, @support_uri = Jonas.find_support(@app_dir, @configuration)
+      @deployme_version, @deployme_uri = Jonas.find_support(@app_dir, @configuration)
     end
 
     # Detects whether this application is a Tomcat application.
@@ -100,6 +101,16 @@ module JavaBuildpack::Container
       end
     end
 
+    def download_deployme
+      download_start_time = Time.now
+      print "-----> Downloading deployme#{@deployme_version} from #{@deployme_uri} "
+
+      JavaBuildpack::Util::ApplicationCache.new.get(@deployme_uri) do |file|  # TODO Use global cache #50175265
+        system "cp #{file.path} #{File.join tomcat_home, 'deployme.jar'}"
+        puts "(#{(Time.now - download_start_time).duration})"
+      end
+    end
+
     def expand(file, configuration)
       expand_start_time = Time.now
       print "-----> Expanding Jonas to #{TOMCAT_HOME} "
@@ -125,6 +136,17 @@ module JavaBuildpack::Container
       return version, uri
     rescue => e
       raise RuntimeError, "Tomcat container error: #{e.message}", e.backtrace
+    end
+
+    def self.find_deployme(app_dir, configuration)
+      if web_inf? app_dir
+        version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration["deployme"])
+      else
+        version = nil
+        uri = nil
+      end
+
+      return version, uri
     end
 
     def self.find_support(app_dir, configuration)
