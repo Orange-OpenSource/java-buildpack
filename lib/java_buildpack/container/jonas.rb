@@ -79,7 +79,7 @@ module JavaBuildpack::Container
 
     KEY_SUPPORT = 'support'.freeze
 
-    RESOURCES = File.join('..', '..', '..', 'resources', 'tomcat').freeze
+    RESOURCES = File.join('..', '..', '..', 'resources', 'jonas').freeze
 
     TOMCAT_HOME = '.tomcat'.freeze
 
