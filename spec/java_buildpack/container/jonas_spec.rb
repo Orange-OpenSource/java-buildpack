@@ -61,7 +61,7 @@ module JavaBuildpack::Container
           :configuration => {}).detect }.to raise_error(/Malformed\ Tomcat\ version/)
     end
 
-    it 'should extract Tomcat from a GZipped TAR' do
+    it 'should extract Jonas from a GZipped TAR, override resources, and remove extra large files' do
       Dir.mktmpdir do |root|
         Dir.mkdir File.join(root, 'WEB-INF')
 
@@ -69,7 +69,7 @@ module JavaBuildpack::Container
           .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
 
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
+        application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-jonas.tar.gz'))
 
         Jonas.new(
           :app_dir => root,
@@ -79,8 +79,19 @@ module JavaBuildpack::Container
         tomcat_dir = File.join root, '.tomcat'
         conf_dir = File.join tomcat_dir, 'conf'
 
-        catalina = File.join tomcat_dir, 'bin', 'catalina.sh'
-        expect(File.exists?(catalina)).to be_true
+        #catalina = File.join tomcat_dir, 'bin', 'catalina.sh'
+        #expect(File.exists?(catalina)).to be_true
+
+        context = File.join conf_dir, 'topology.xml'
+        expect(File.exists?(context)).to be_true
+
+        #Filtered out
+        context = File.join tomcat_dir, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
+        expect(File.exists?(context)).to be_false
+
+        #Not yet filtered out but present in stub
+        context = File.join tomcat_dir, 'lib/client.jar'
+        expect(File.exists?(context)).to be_true
 
         context = File.join conf_dir, 'context.xml'
         expect(File.exists?(context)).to be_true

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<topology xmlns="http://jasmine.ow2.org/deployme-1.2">
+    <machines>
+        <machine name="dev-2122859-421"/>
+    </machines>
+    <domains>
+        <domain name="singleDomain">
+            <configuration>
+                <global_options/>
+            </configuration>
+            <servers>
+                <server machine="dev-2122859-421" name="singleServerName">
+                    <configuration>
+                        <global_options>
+                            <java_home><%= ENV["JAVA_HOME"] %></java_home>
+                            <java_opts><%= ENV["JAVA_OPTS"] %></java_opts>
+                            <jonas_root><%= ENV["JONAS_ROOT"] %></jonas_root>
+                            <jonas_base><%= ENV["JONAS_BASE"] %></jonas_base>
+                            <jonas_services>jtm,security,resource,web,ear,depmonitor,wc</jonas_services>
+                            <host>localhost</host>
+                            <jonas_development>false</jonas_development>
+                            <protocols_list>jrmp</protocols_list>
+                            <jrmp_port>9102</jrmp_port>
+                            <jndi_local_call_optimization>false</jndi_local_call_optimization>
+                        </global_options>
+                        <web>
+                            <https_activated>false</https_activated>
+                            <ajp_activated>true</ajp_activated>
+                            <http_replication_activated>false</http_replication_activated>
+                            <http_conf>
+                                <web_conf>
+                                    <port><%= ENV["PORT"] %></port>
+                                    <maxThreads>120</maxThreads>
+                                    <minSpareThreads>5</minSpareThreads>
+                                    <maxSpareThreads>10</maxSpareThreads>
+                                </web_conf>
+                            </http_conf>
+                        </web>
+                    </configuration>
+                </server>
+            </servers>
+        </domain>
+    </domains>
+    <applications/>
+</topology>
