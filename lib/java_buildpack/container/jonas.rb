@@ -57,6 +57,7 @@ module JavaBuildpack::Container
     # @return [void]
     def compile
       download_jonas
+      download_deployme
       link_application
       link_libs
     end
