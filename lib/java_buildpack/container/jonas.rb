@@ -102,11 +102,11 @@ module JavaBuildpack::Container
 
     def expand(file, configuration)
       expand_start_time = Time.now
-      print "-----> Expanding Tomcat to #{TOMCAT_HOME} "
+      print "-----> Expanding Jonas to #{TOMCAT_HOME} "
 
       system "rm -rf #{tomcat_home}"
       system "mkdir -p #{tomcat_home}"
-      system "tar xzf #{file.path} -C #{tomcat_home} --strip 1 --exclude webapps --exclude #{File.join 'conf', 'server.xml'} --exclude #{File.join 'conf', 'context.xml'} 2>&1"
+      system "tar xzf #{file.path} -C #{tomcat_home} --strip 1 --exclude webapps --exclude deploy/jonasAdmin.xml --exclude repositories/maven2-internal/org/ow2/jonas/jonas-admin --exclude deploy/doc.xml --exclude repositories/maven2-internal/org/ow2/jonas/documentation  --exclude webapps --exclude #{File.join 'conf', 'server.xml'} --exclude #{File.join 'conf', 'context.xml'} 2>&1"
 
       copy_resources tomcat_home
       puts "(#{(Time.now - expand_start_time).duration})"
