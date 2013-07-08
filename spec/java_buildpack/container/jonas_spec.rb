@@ -171,7 +171,9 @@ module JavaBuildpack::Container
         :java_opts => [ 'test-opt-2', 'test-opt-1' ],
         :configuration => {}).release
 
-      expect(command).to eq('JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" .tomcat/bin/catalina.sh run')
+      deployme_cmd = 'java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology-CF.xml -domainName=singleDomain -serverName=singleServerName'
+      expect(command).to eq(File.join('JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2";',
+                                      deployme_cmd , ' && .tomcat/bin/catalina.sh run'))
     end
 
   end
