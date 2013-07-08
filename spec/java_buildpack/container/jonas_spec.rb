@@ -77,25 +77,25 @@ module JavaBuildpack::Container
           :configuration => { }
         ).compile
 
-        tomcat_dir = File.join root, '.tomcat'
-        conf_dir = File.join tomcat_dir, 'conf'
+        jonas_root = File.join root, '.jonas_root'
+        conf_dir = File.join jonas_root, 'conf'
 
-        #catalina = File.join tomcat_dir, 'bin', 'catalina.sh'
+        #catalina = File.join jonas_root, 'bin', 'catalina.sh'
         #expect(File.exists?(catalina)).to be_true
 
         #Filtered out
-        context = File.join tomcat_dir, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
+        context = File.join jonas_root, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
         expect(File.exists?(context)).to be_false
 
         #Not yet filtered out but present in stub
-        context = File.join tomcat_dir, 'lib/client.jar'
+        context = File.join jonas_root, 'lib/client.jar'
         expect(File.exists?(context)).to be_true
 
-        deployme_dir = File.join tomcat_dir, 'deployme'
+        deployme_dir = File.join jonas_root, 'deployme'
         context = File.join deployme_dir, 'topology.xml'
         expect(File.exists?(context)).to be_true
 
-        deployme = File.join tomcat_dir, 'deployme/deployme.jar'
+        deployme = File.join jonas_root, 'deployme/deployme.jar'
         expect(File.exists?(deployme)).to be_true
       end
     end
