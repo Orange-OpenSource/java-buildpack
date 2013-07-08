@@ -92,12 +92,6 @@ module JavaBuildpack::Container
         #Not yet filtered out but present in stub
         context = File.join tomcat_dir, 'lib/client.jar'
         expect(File.exists?(context)).to be_true
-
-        context = File.join conf_dir, 'context.xml'
-        expect(File.exists?(context)).to be_true
-
-        server = File.join conf_dir, 'server.xml'
-        expect(File.exists?(server)).to be_true
       end
     end
 
