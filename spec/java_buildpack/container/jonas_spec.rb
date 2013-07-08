@@ -61,7 +61,7 @@ module JavaBuildpack::Container
           :configuration => {}).detect }.to raise_error(/Malformed\ Tomcat\ version/)
     end
 
-    it 'should extract Jonas from a GZipped TAR, override resources, and remove extra large files' do
+    it 'should extract Jonas and deployme from a GZipped TAR, override resources, and remove extra large files' do
       Dir.mktmpdir do |root|
         Dir.mkdir File.join(root, 'WEB-INF')
 
@@ -70,6 +70,7 @@ module JavaBuildpack::Container
 
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-jonas.tar.gz'))
+        application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
 
         Jonas.new(
           :app_dir => root,
@@ -92,6 +93,9 @@ module JavaBuildpack::Container
         #Not yet filtered out but present in stub
         context = File.join tomcat_dir, 'lib/client.jar'
         expect(File.exists?(context)).to be_true
+
+        support = File.join tomcat_dir, 'deployme.jar'
+        expect(File.exists?(support)).to be_true
       end
     end
 
