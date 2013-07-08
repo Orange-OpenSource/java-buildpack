@@ -83,9 +83,6 @@ module JavaBuildpack::Container
         #catalina = File.join tomcat_dir, 'bin', 'catalina.sh'
         #expect(File.exists?(catalina)).to be_true
 
-        context = File.join conf_dir, 'topology.xml'
-        expect(File.exists?(context)).to be_true
-
         #Filtered out
         context = File.join tomcat_dir, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
         expect(File.exists?(context)).to be_false
@@ -94,8 +91,12 @@ module JavaBuildpack::Container
         context = File.join tomcat_dir, 'lib/client.jar'
         expect(File.exists?(context)).to be_true
 
-        support = File.join tomcat_dir, 'deployme.jar'
-        expect(File.exists?(support)).to be_true
+        deployme_dir = File.join tomcat_dir, 'deployme'
+        context = File.join deployme_dir, 'topology.xml'
+        expect(File.exists?(context)).to be_true
+
+        deployme = File.join tomcat_dir, 'deployme/deployme.jar'
+        expect(File.exists?(deployme)).to be_true
       end
     end
 

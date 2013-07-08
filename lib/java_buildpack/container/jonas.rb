@@ -107,7 +107,7 @@ module JavaBuildpack::Container
       print "-----> Downloading deployme#{@deployme_version} from #{@deployme_uri} "
 
       JavaBuildpack::Util::ApplicationCache.new.get(@deployme_uri) do |file|  # TODO Use global cache #50175265
-        system "cp #{file.path} #{File.join tomcat_home, 'deployme.jar'}"
+        system "cp #{file.path} #{File.join tomcat_home, 'deployme', 'deployme.jar'}"
         puts "(#{(Time.now - download_start_time).duration})"
       end
     end
