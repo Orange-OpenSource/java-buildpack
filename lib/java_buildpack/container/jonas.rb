@@ -79,7 +79,7 @@ module JavaBuildpack::Container
       topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml_file}"
       deployme_cmd_string     = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
-      start_script_string     = ". #{setenv_cmd_string} && jonas start -fg"
+      start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
       "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{export_vars_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string} run"
     end
