@@ -95,7 +95,7 @@ module JavaBuildpack::Container
         expect(File.exists?(context)).to be_true
 
         deployme_dir = File.join jonas_root, 'deployme'
-        context = File.join deployme_dir, 'topology.xml'
+        context = File.join deployme_dir, 'topology.xml.erb'
         expect(File.exists?(context)).to be_true
 
         deployme = File.join jonas_root, 'deployme/deployme.jar'
