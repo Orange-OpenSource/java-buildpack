@@ -76,7 +76,7 @@ module JavaBuildpack::Container
       topology_xml_erb_file = File.join deployme_root, 'topology.xml.erb'
       topology_xml_file = File.join deployme_root, 'topology.xml'
       deployme_jar_file = File.join deployme_root, 'deployme.jar'
-      topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml}"
+      topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml_file}"
       deployme_cmd_string     = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
       start_script_string     = File.join TOMCAT_HOME, 'bin', 'catalina.sh'
 
