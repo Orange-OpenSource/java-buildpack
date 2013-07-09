@@ -73,9 +73,10 @@ module JavaBuildpack::Container
       deployme_var_string     = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
       deployme_root = File.join JONAS_ROOT, 'deployme'
       export_vars_string     = "export JONAS_ROOT JONAS_BASE JAVA_HOME JAVA_OPTS"
+      topology_xml_erb_file = File.join deployme_root, 'topology.xml.erb'
       topology_xml_file = File.join deployme_root, 'topology.xml'
       deployme_jar_file = File.join deployme_root, 'deployme.jar'
-      topology_erb_cmd_string = "erb #{topology_xml_file}"
+      topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml}"
       deployme_cmd_string     = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
       start_script_string     = File.join TOMCAT_HOME, 'bin', 'catalina.sh'
 
