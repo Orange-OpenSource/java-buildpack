@@ -60,6 +60,8 @@ module JavaBuildpack::Container
       download_deployme
       link_application
       link_libs
+
+      print "-----> App run cmd in release will be: #{release} "
     end
 
     # Creates the command to run the Tomcat application.
@@ -79,8 +81,6 @@ module JavaBuildpack::Container
       start_script_string     = File.join TOMCAT_HOME, 'bin', 'catalina.sh'
 
       final_cmd_string = "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string} run"
-      print "-----> App run cmd will be #{final_cmd_string} "
-
       final_cmd_string
     end
 
