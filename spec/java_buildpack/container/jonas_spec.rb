@@ -61,7 +61,7 @@ module JavaBuildpack::Container
           :configuration => {}).detect }.to raise_error(/Malformed\ Tomcat\ version/)
     end
 
-    it 'should extract Jonas and deployme from a GZipped TAR, override resources, and remove extra large files' do
+    it 'should extract Jonas and deployme from a GZipped TAR, override resources, create .jonas_base and remove extra large files' do
       Dir.mktmpdir do |root|
         Dir.mkdir File.join(root, 'WEB-INF')
 
@@ -78,7 +78,10 @@ module JavaBuildpack::Container
         ).compile
 
         jonas_root = File.join root, '.jonas_root'
-        conf_dir = File.join jonas_root, 'conf'
+        expect(File.exists?(jonas_root)).to be_true
+
+        jonas_base = File.join root, '.jonas_base'
+        expect(File.exists?(jonas_base)).to be_true
 
         #catalina = File.join jonas_root, 'bin', 'catalina.sh'
         #expect(File.exists?(catalina)).to be_true
