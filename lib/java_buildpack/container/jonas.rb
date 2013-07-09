@@ -127,6 +127,8 @@ module JavaBuildpack::Container
 
       system "rm -rf #{jonas_root}"
       system "mkdir -p #{jonas_root}"
+      system "rm -rf #{jonas_base}"
+      system "mkdir -p #{jonas_base}"
       system "tar xzf #{file.path} -C #{jonas_root} --strip 1 --exclude webapps --exclude deploy/jonasAdmin.xml --exclude repositories/maven2-internal/org/ow2/jonas/jonas-admin --exclude deploy/doc.xml --exclude repositories/maven2-internal/org/ow2/jonas/documentation  --exclude webapps --exclude #{File.join 'conf', 'server.xml'} --exclude #{File.join 'conf', 'context.xml'} 2>&1"
 
       copy_resources jonas_root
