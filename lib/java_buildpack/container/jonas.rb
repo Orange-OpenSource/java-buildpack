@@ -59,7 +59,6 @@ module JavaBuildpack::Container
       download_jonas
       download_deployme
       link_application
-      link_libs
     end
 
     # Creates the command to run the Tomcat application.
@@ -185,15 +184,6 @@ module JavaBuildpack::Container
       system "ln -s #{File.join '..', '..'} #{root}"
     end
 
-    def link_libs
-      libs = ContainerUtils.libs(@app_dir, @lib_directory)
-
-      if libs
-        FileUtils.mkdir_p(web_inf_lib) unless File.exists?(web_inf_lib)
-        libs.each { |lib| system "ln -s #{File.join '..', '..', lib} #{web_inf_lib}" }
-      end
-    end
-
     def root
       File.join jonas_deploy, 'ROOT'
     end
@@ -211,10 +201,6 @@ module JavaBuildpack::Container
 
     def jonas_deploy
       File.join jonas_base, 'deploy'
-    end
-
-    def web_inf_lib
-      File.join root, 'WEB-INF', 'lib'
     end
 
     def self.web_inf?(app_dir)
