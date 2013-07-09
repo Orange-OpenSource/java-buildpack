@@ -180,7 +180,7 @@ module JavaBuildpack::Container
 
     def link_application
       system "rm -rf #{root}"
-      system "mkdir -p #{webapps}"
+      system "mkdir -p #{jonas_deploy}"
       system "ln -s #{File.join '..', '..'} #{root}"
     end
 
@@ -194,7 +194,7 @@ module JavaBuildpack::Container
     end
 
     def root
-      File.join webapps, 'ROOT'
+      File.join jonas_deploy, 'ROOT'
     end
 
     def jonas_root
@@ -208,8 +208,8 @@ module JavaBuildpack::Container
       File.join @app_dir, TOMCAT_HOME
     end
 
-    def webapps
-      File.join tomcat_home, 'webapps'
+    def jonas_deploy
+      File.join jonas_base, 'deploy'
     end
 
     def web_inf_lib
