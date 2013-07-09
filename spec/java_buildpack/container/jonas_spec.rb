@@ -103,7 +103,7 @@ module JavaBuildpack::Container
       end
     end
 
-    it 'should link the application directory to the ROOT webapp' do
+    it 'should link the application directory to the jonas_base/deploy directory' do
       Dir.mktmpdir do |root|
         Dir.mkdir File.join(root, 'WEB-INF')
 
@@ -119,7 +119,7 @@ module JavaBuildpack::Container
           :configuration => { }
         ).compile
 
-        root_webapp = File.join root, '.tomcat', 'webapps', 'ROOT'
+        root_webapp = File.join root, '.jonas_base', 'deploy', 'ROOT'
         expect(File.exists?(root_webapp)).to be_true
         expect(File.symlink?(root_webapp)).to be_true
         expect(File.readlink(root_webapp)).to eq('../..')
@@ -180,8 +180,9 @@ module JavaBuildpack::Container
                      'export JONAS_ROOT JONAS_BASE JAVA_HOME JAVA_OPTS;' +
                      'erb .jonas_root/deployme/topology.xml.erb > .jonas_root/deployme/topology.xml && ' +
                      '$JAVA_HOME/bin/java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName && '
+      linkapp_cmd=   'ln -sf ../.. .jonas_base/deploy/app && '
       containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
-      expect(command).to eq(javaenv_cmd + deployme_cmd +containerstart_cmd)
+      expect(command).to eq(javaenv_cmd + deployme_cmd + linkapp_cmd + containerstart_cmd)
     end
 
   end

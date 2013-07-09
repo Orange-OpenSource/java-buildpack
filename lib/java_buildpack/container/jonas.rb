@@ -79,9 +79,10 @@ module JavaBuildpack::Container
       topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml_file}"
       deployme_cmd_string     = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
+      linkapp_cmd=   'ln -sf ../.. .jonas_base/deploy/app &&'
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
-      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{export_vars_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string}"
+      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{export_vars_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{linkapp_cmd} && #{start_script_string}"
     end
 
     private
@@ -180,7 +181,7 @@ module JavaBuildpack::Container
 
     def link_application
       system "rm -rf #{root}"
-      system "mkdir -p #{webapps}"
+      system "mkdir -p #{jonas_deploy}"
       system "ln -s #{File.join '..', '..'} #{root}"
     end
 
@@ -194,7 +195,7 @@ module JavaBuildpack::Container
     end
 
     def root
-      File.join webapps, 'ROOT'
+      File.join jonas_deploy, 'ROOT'
     end
 
     def jonas_root
@@ -208,8 +209,8 @@ module JavaBuildpack::Container
       File.join @app_dir, TOMCAT_HOME
     end
 
-    def webapps
-      File.join tomcat_home, 'webapps'
+    def jonas_deploy
+      File.join jonas_base, 'deploy'
     end
 
     def web_inf_lib
