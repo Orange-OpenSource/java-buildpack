@@ -41,7 +41,7 @@ module JavaBuildpack::Container
       @configuration = context[:configuration]
       @jonas_version, @tomcat_uri = Jonas.find_tomcat(@app_dir, @configuration)
       @support_version, @support_uri = Jonas.find_support(@app_dir, @configuration)
-      @deployme_version, @deployme_uri = Jonas.find_support(@app_dir, @configuration)
+      @deployme_version, @deployme_uri = Jonas.find_deployme(@app_dir, @configuration)
     end
 
     # Detects whether this application is a Tomcat application.
