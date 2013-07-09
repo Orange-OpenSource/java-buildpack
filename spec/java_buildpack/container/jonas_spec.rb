@@ -77,25 +77,26 @@ module JavaBuildpack::Container
           :configuration => { }
         ).compile
 
-        tomcat_dir = File.join root, '.tomcat'
-        conf_dir = File.join tomcat_dir, 'conf'
+        jonas_root = File.join root, '.jonas_root'
+        conf_dir = File.join jonas_root, 'conf'
 
-        #catalina = File.join tomcat_dir, 'bin', 'catalina.sh'
+        #catalina = File.join jonas_root, 'bin', 'catalina.sh'
         #expect(File.exists?(catalina)).to be_true
 
-        context = File.join conf_dir, 'topology.xml'
-        expect(File.exists?(context)).to be_true
-
         #Filtered out
-        context = File.join tomcat_dir, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
+        context = File.join jonas_root, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
         expect(File.exists?(context)).to be_false
 
         #Not yet filtered out but present in stub
-        context = File.join tomcat_dir, 'lib/client.jar'
+        context = File.join jonas_root, 'lib/client.jar'
         expect(File.exists?(context)).to be_true
 
-        support = File.join tomcat_dir, 'deployme.jar'
-        expect(File.exists?(support)).to be_true
+        deployme_dir = File.join jonas_root, 'deployme'
+        context = File.join deployme_dir, 'topology.xml'
+        expect(File.exists?(context)).to be_true
+
+        deployme = File.join jonas_root, 'deployme/deployme.jar'
+        expect(File.exists?(deployme)).to be_true
       end
     end
 
@@ -165,12 +166,18 @@ module JavaBuildpack::Container
         .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
 
       command = Jonas.new(
-        :app_dir => 'spec/fixtures/container_tomcat',
+        :app_dir => 'spec/fixtures/container_jonas',
         :java_home => 'test-java-home',
         :java_opts => [ 'test-opt-2', 'test-opt-1' ],
         :configuration => {}).release
 
-      expect(command).to eq('JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" .tomcat/bin/catalina.sh run')
+
+      javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" '
+      deployme_cmd = 'JONAS_ROOT=spec/fixtures/container_jonas/.jonas_root JONAS_BASE=spec/fixtures/container_jonas/.jonas_base;'+
+                     'erb spec/fixtures/container_jonas/.jonas_root/deployme/topology.xml && ' +
+                     'java -jar spec/fixtures/container_jonas/.jonas_root/deployme/deployme.jar -topologyFile=spec/fixtures/container_jonas/.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName'
+      containerstart_cmd = ' && .tomcat/bin/catalina.sh run'
+      expect(command).to eq(javaenv_cmd + deployme_cmd +containerstart_cmd)
     end
 
   end

@@ -69,10 +69,16 @@ module JavaBuildpack::Container
       @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
 
       java_home_string = "JAVA_HOME=#{@java_home}"
-      java_opts_string = ContainerUtils.space("JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\"")
-      start_script_string = ContainerUtils.space(File.join TOMCAT_HOME, 'bin', 'catalina.sh')
+      java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
+      deployme_var_string     = "JONAS_ROOT=#{jonas_root} JONAS_BASE=#{jonas_base}"
+      deployme_root = File.join jonas_root, 'deployme'
+      topology_xml_file = File.join deployme_root, 'topology.xml'
+      deployme_jar_file = File.join deployme_root, 'deployme.jar'
+      topology_erb_cmd_string = "erb #{topology_xml_file}"
+      deployme_cmd_string     = "java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
+      start_script_string     = File.join TOMCAT_HOME, 'bin', 'catalina.sh'
 
-      "#{java_home_string}#{java_opts_string}#{start_script_string} run"
+      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string} run"
     end
 
     private
@@ -84,6 +90,8 @@ module JavaBuildpack::Container
     RESOURCES = File.join('..', '..', '..', 'resources', 'jonas').freeze
 
     TOMCAT_HOME = '.tomcat'.freeze
+    JONAS_ROOT = '.jonas_root'.freeze
+    JONAS_BASE = '.jonas_base'.freeze
 
     WEB_INF_DIRECTORY = 'WEB-INF'.freeze
 
@@ -107,20 +115,20 @@ module JavaBuildpack::Container
       print "-----> Downloading deployme#{@deployme_version} from #{@deployme_uri} "
 
       JavaBuildpack::Util::ApplicationCache.new.get(@deployme_uri) do |file|  # TODO Use global cache #50175265
-        system "cp #{file.path} #{File.join tomcat_home, 'deployme.jar'}"
+        system "cp #{file.path} #{File.join jonas_root, 'deployme', 'deployme.jar'}"
         puts "(#{(Time.now - download_start_time).duration})"
       end
     end
 
     def expand(file, configuration)
       expand_start_time = Time.now
-      print "-----> Expanding Jonas to #{TOMCAT_HOME} "
+      print "-----> Expanding Jonas to #{JONAS_ROOT} "
 
-      system "rm -rf #{tomcat_home}"
-      system "mkdir -p #{tomcat_home}"
-      system "tar xzf #{file.path} -C #{tomcat_home} --strip 1 --exclude webapps --exclude deploy/jonasAdmin.xml --exclude repositories/maven2-internal/org/ow2/jonas/jonas-admin --exclude deploy/doc.xml --exclude repositories/maven2-internal/org/ow2/jonas/documentation  --exclude webapps --exclude #{File.join 'conf', 'server.xml'} --exclude #{File.join 'conf', 'context.xml'} 2>&1"
+      system "rm -rf #{jonas_root}"
+      system "mkdir -p #{jonas_root}"
+      system "tar xzf #{file.path} -C #{jonas_root} --strip 1 --exclude webapps --exclude deploy/jonasAdmin.xml --exclude repositories/maven2-internal/org/ow2/jonas/jonas-admin --exclude deploy/doc.xml --exclude repositories/maven2-internal/org/ow2/jonas/documentation  --exclude webapps --exclude #{File.join 'conf', 'server.xml'} --exclude #{File.join 'conf', 'context.xml'} 2>&1"
 
-      copy_resources tomcat_home
+      copy_resources jonas_root
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
@@ -182,6 +190,13 @@ module JavaBuildpack::Container
 
     def root
       File.join webapps, 'ROOT'
+    end
+
+    def jonas_root
+      File.join @app_dir, JONAS_ROOT
+    end
+    def jonas_base
+      File.join @app_dir, JONAS_BASE
     end
 
     def tomcat_home

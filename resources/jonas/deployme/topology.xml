@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <topology xmlns="http://jasmine.ow2.org/deployme-1.2">
     <machines>
-        <machine name="dev-2122859-421"/>
+        <machine name="localhost"/>
     </machines>
     <domains>
         <domain name="singleDomain">
@@ -9,7 +9,7 @@
                 <global_options/>
             </configuration>
             <servers>
-                <server machine="dev-2122859-421" name="singleServerName">
+                <server machine="localhost" name="singleServerName">
                     <configuration>
                         <global_options>
                             <java_home><%= ENV["JAVA_HOME"] %></java_home>
