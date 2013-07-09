@@ -12,7 +12,7 @@
                 <server machine="localhost" name="singleServerName">
                     <configuration>
                         <global_options>
-                            <java_home><%= ENV["JAVA_HOME"] %></java_home>
+                            <java_home><%= File.realpath(ENV["JAVA_HOME"]) %></java_home>
                             <java_opts><%= ENV["JAVA_OPTS"] %></java_opts>
                             <jonas_root><%= File.realpath(ENV["JONAS_ROOT"]) %></jonas_root>
                             <jonas_base><%= File.realpath(ENV["JONAS_BASE"]) %></jonas_base>
