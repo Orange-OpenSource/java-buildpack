@@ -69,10 +69,16 @@ module JavaBuildpack::Container
       @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
 
       java_home_string = "JAVA_HOME=#{@java_home}"
-      java_opts_string = ContainerUtils.space("JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\"")
-      start_script_string = ContainerUtils.space(File.join TOMCAT_HOME, 'bin', 'catalina.sh')
+      java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
+      deployme_var_string     = "JONAS_ROOT=#{jonas_root} JONAS_BASE=#{jonas_base}"
+      deployme_root = File.join jonas_root, 'deployme'
+      topology_xml_file = File.join deployme_root, 'topology.xml'
+      deployme_jar_file = File.join deployme_root, 'deployme.jar'
+      topology_erb_cmd_string = "erb #{topology_xml_file}"
+      deployme_cmd_string     = "java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
+      start_script_string     = File.join TOMCAT_HOME, 'bin', 'catalina.sh'
 
-      "#{java_home_string}#{java_opts_string}#{start_script_string} run"
+      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string} run"
     end
 
     private
