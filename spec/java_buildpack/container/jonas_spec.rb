@@ -166,14 +166,18 @@ module JavaBuildpack::Container
         .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
 
       command = Jonas.new(
-        :app_dir => 'spec/fixtures/container_tomcat',
+        :app_dir => 'spec/fixtures/container_jonas',
         :java_home => 'test-java-home',
         :java_opts => [ 'test-opt-2', 'test-opt-1' ],
         :configuration => {}).release
 
-      deployme_cmd = 'java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology-CF.xml -domainName=singleDomain -serverName=singleServerName'
-      expect(command).to eq(File.join('JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2";',
-                                      deployme_cmd , ' && .tomcat/bin/catalina.sh run'))
+
+      javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" '
+      deployme_cmd = 'JONAS_ROOT=spec/fixtures/container_jonas/.jonas_root JONAS_BASE=spec/fixtures/container_jonas/.jonas_base;'+
+                     'erb spec/fixtures/container_jonas/.jonas_root/deployme/topology.xml && ' +
+                     'java -jar spec/fixtures/container_jonas/.jonas_root/deployme/deployme.jar -topologyFile=spec/fixtures/container_jonas/.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName'
+      containerstart_cmd = ' && .tomcat/bin/catalina.sh run'
+      expect(command).to eq(javaenv_cmd + deployme_cmd +containerstart_cmd)
     end
 
   end
