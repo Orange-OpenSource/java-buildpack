@@ -14,8 +14,8 @@
                         <global_options>
                             <java_home><%= ENV["JAVA_HOME"] %></java_home>
                             <java_opts><%= ENV["JAVA_OPTS"] %></java_opts>
-                            <jonas_root><%= ENV["JONAS_ROOT"] %></jonas_root>
-                            <jonas_base><%= ENV["JONAS_BASE"] %></jonas_base>
+                            <jonas_root><%= File.realpath(ENV["JONAS_ROOT"]) %></jonas_root>
+                            <jonas_base><%= File.realpath(ENV["JONAS_BASE"]) %></jonas_base>
                             <jonas_services>jtm,security,resource,web,ear,depmonitor,wc</jonas_services>
                             <host>localhost</host>
                             <jonas_development>false</jonas_development>
