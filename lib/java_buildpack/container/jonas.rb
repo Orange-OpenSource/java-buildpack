@@ -43,7 +43,9 @@ module JavaBuildpack::Container
       @support_version, @support_uri = Jonas.find_support(@app_dir, @configuration)
       @deployme_version, @deployme_uri = Jonas.find_deployme(@app_dir, @configuration)
 
-      @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
+      if @java_opts
+        @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
+      end
     end
 
     # Detects whether this application is a Tomcat application.
@@ -60,7 +62,8 @@ module JavaBuildpack::Container
     def compile
       download_jonas
       download_deployme
-      print 'Compile completed, release cmd to be run:' + release + ' '
+      puts 'Compile completed, release cmd to be run:'
+      puts release
     end
 
     # Creates the command to run the Tomcat application.
