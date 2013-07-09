@@ -173,9 +173,9 @@ module JavaBuildpack::Container
 
 
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" '
-      deployme_cmd = 'JONAS_ROOT=spec/fixtures/container_jonas/.jonas_root JONAS_BASE=spec/fixtures/container_jonas/.jonas_base;'+
-                     'erb spec/fixtures/container_jonas/.jonas_root/deployme/topology.xml && ' +
-                     'java -jar spec/fixtures/container_jonas/.jonas_root/deployme/deployme.jar -topologyFile=spec/fixtures/container_jonas/.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName'
+      deployme_cmd = 'JONAS_ROOT=.jonas_root JONAS_BASE=.jonas_base;'+
+                     'erb .jonas_root/deployme/topology.xml && ' +
+                     'java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName'
       containerstart_cmd = ' && .tomcat/bin/catalina.sh run'
       expect(command).to eq(javaenv_cmd + deployme_cmd +containerstart_cmd)
     end
