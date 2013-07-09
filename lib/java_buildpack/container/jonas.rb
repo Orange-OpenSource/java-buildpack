@@ -60,8 +60,6 @@ module JavaBuildpack::Container
     def compile
       download_jonas
       download_deployme
-      link_application
-
       print 'Compile completed, release cmd to be run:' + release + ' '
     end
 
@@ -180,11 +178,6 @@ module JavaBuildpack::Container
       "jonas-#{version}"
     end
 
-    def link_application
-      system "rm -rf #{root}"
-      system "mkdir -p #{jonas_deploy}"
-      system "ln -s #{File.join '..', '..'} #{root}"
-    end
 
     def root
       File.join jonas_deploy, 'ROOT'

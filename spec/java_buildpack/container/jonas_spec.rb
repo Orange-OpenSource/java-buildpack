@@ -103,30 +103,6 @@ module JavaBuildpack::Container
       end
     end
 
-    it 'should link the application directory to the jonas_base/deploy directory' do
-      Dir.mktmpdir do |root|
-        Dir.mkdir File.join(root, 'WEB-INF')
-
-        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
-          .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
-
-        JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
-        application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
-
-        Jonas.new(
-          :app_dir => root,
-          :configuration => { }
-        ).compile
-
-        root_webapp = File.join root, '.jonas_base', 'deploy', 'ROOT'
-        expect(File.exists?(root_webapp)).to be_true
-        expect(File.symlink?(root_webapp)).to be_true
-        expect(File.readlink(root_webapp)).to eq('../..')
-      end
-    end
-
-
     it 'should return command' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
