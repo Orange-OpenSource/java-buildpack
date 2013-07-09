@@ -81,7 +81,7 @@ module JavaBuildpack::Container
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
-      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{export_vars_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string} run"
+      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{export_vars_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string}"
     end
 
     private
