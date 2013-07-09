@@ -78,7 +78,10 @@ module JavaBuildpack::Container
       deployme_cmd_string     = "java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
       start_script_string     = File.join TOMCAT_HOME, 'bin', 'catalina.sh'
 
-      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string} run"
+      final_cmd_string = "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{start_script_string} run"
+      print "-----> App run cmd will be #{final_cmd_string} "
+
+      final_cmd_string
     end
 
     private
