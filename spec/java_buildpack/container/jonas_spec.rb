@@ -26,7 +26,7 @@ module JavaBuildpack::Container
 
     SUPPORT_VERSION = JavaBuildpack::Util::TokenizedVersion.new('1.0.+')
 
-    SUPPORT_DETAILS = [SUPPORT_VERSION, 'test-support-uri']
+    JONAS_SUPPORT_DETAILS = [SUPPORT_VERSION, 'test-support-uri']
 
     let(:application_cache) { double('ApplicationCache') }
 
@@ -37,7 +37,7 @@ module JavaBuildpack::Container
 
     it 'should detect WEB-INF' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
-        .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
+        .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       detected = Jonas.new(
           :app_dir => 'spec/fixtures/container_tomcat',
           :configuration => {}).detect
@@ -55,7 +55,7 @@ module JavaBuildpack::Container
 
     it 'should fail when a malformed version is detected' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JavaBuildpack::Util::TokenizedVersion.new('7.0.40_0')) if block }
-        .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
+        .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       expect { Jonas.new(
           :app_dir => 'spec/fixtures/container_tomcat',
           :configuration => {}).detect }.to raise_error(/Malformed\ Tomcat\ version/)
@@ -66,7 +66,7 @@ module JavaBuildpack::Container
         Dir.mkdir File.join(root, 'WEB-INF')
 
         JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
-          .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
+          .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
 
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-jonas.tar.gz'))
@@ -105,7 +105,7 @@ module JavaBuildpack::Container
 
     it 'should return command' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
-        .and_return(JONAS_DETAILS, SUPPORT_DETAILS)
+        .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
 
       command = Jonas.new(
         :app_dir => 'spec/fixtures/container_jonas',
