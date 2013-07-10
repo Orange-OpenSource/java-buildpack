@@ -46,7 +46,7 @@ module JavaBuildpack::Container
       if @java_opts
         @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
       else
-        @java_opts = ''
+        @java_opts = []
       end
     end
 
