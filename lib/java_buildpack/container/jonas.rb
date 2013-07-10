@@ -72,6 +72,8 @@ module JavaBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
+      app_war_file = File.join JONAS_BASE, 'deploy' , 'app.war'
+      if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
       deployme_var_string     = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
@@ -82,11 +84,12 @@ module JavaBuildpack::Container
       deployme_jar_file = File.join deployme_root, 'deployme.jar'
       topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml_file}"
       deployme_cmd_string     = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
+      else_skip_string        = 'else echo "skipping jonas_base config as already present"; fi)'
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
-      linkapp_cmd=   'ln -s ../.. .jonas_base/deploy/app.war'
+      linkapp_cmd=   "ln -s ../.. #{app_war_file}"
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
-      "#{java_home_string} #{java_opts_string} #{deployme_var_string};#{export_vars_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{linkapp_cmd} && #{start_script_string}"
+      "#{java_home_string} #{java_opts_string} #{if_jonas_base_exists_string} #{deployme_var_string};#{export_vars_string};#{topology_erb_cmd_string} && #{deployme_cmd_string} && #{linkapp_cmd}; #{else_skip_string} && #{start_script_string}"
     end
 
     private
