@@ -24,4 +24,3 @@ jres:
   - "JavaBuildpack::Jre::OpenJdk"
 frameworks:
   - "JavaBuildpack::Framework::JavaOpts"
-  - "JavaBuildpack::Framework::AutoReconfiguration"
