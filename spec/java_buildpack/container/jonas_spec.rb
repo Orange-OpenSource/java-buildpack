@@ -61,6 +61,36 @@ module JavaBuildpack::Container
           :configuration => {}).detect }.to raise_error(/Malformed\ Tomcat\ version/)
     end
 
+    it 'should remove jcl-over-slf4 jars from WEB-INF/lib as it conflicts with jonas embedded slf4j-jcl' do
+      Dir.mktmpdir do |root|
+        Dir.mkdir File.join(root, 'WEB-INF')
+
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
+        .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
+
+
+        dir = File.join(root, 'WEB-INF', 'lib')
+        Dir.mkdir dir
+        touch(dir, 'jcl-over-slf4j.jar')
+        touch(dir, 'jcl-over-slf4j-1.5.10.jar')
+        touch(dir, 'random.jar')
+
+        command = Jonas.new(
+            :app_dir => root,
+            :java_home => 'test-java-home',
+            :java_opts => [ 'test-opt-2', 'test-opt-1' ],
+            :configuration => {}).remove_jcl_over_slf
+
+
+        expected_deleted_jars = Dir.glob(File.join dir, 'jcl-over-slf4*.jar')
+
+        expected_random_file_untouched = Dir.glob(File.join dir, 'random.jar')
+
+        expect(expected_random_file_untouched).to_not be_empty
+        expect(expected_deleted_jars).to be_empty
+      end
+    end
+
     it 'should extract Jonas and deployme from a GZipped TAR, override resources, create .jonas_base and remove extra large files' do
       Dir.mktmpdir do |root|
         Dir.mkdir File.join(root, 'WEB-INF')
@@ -121,10 +151,16 @@ module JavaBuildpack::Container
                      'export JONAS_ROOT JONAS_BASE && ' +
                      'erb .jonas_root/deployme/topology.xml.erb > .jonas_root/deployme/topology.xml && ' +
                      '$JAVA_HOME/bin/java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName && ' +
-                     'ls -alR && cat WEB-INF/web.xml && mkdir -p .jonas_base/deploy/app.war && cp -r --dereference * .jonas_base/deploy/app.war/; '+
+                     'mkdir -p .jonas_base/deploy/app.war && cp -r --dereference * .jonas_base/deploy/app.war/; '+
                      'else echo "skipping jonas_base config as already present"; fi) && '
       containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
       expect(command).to eq(javaenv_cmd + deployme_cmd + containerstart_cmd)
+    end
+
+    def touch(dir, name)
+      file = File.join(dir, name)
+      File.open(file, 'w') { |f| f.write('foo') }
+      file
     end
 
   end

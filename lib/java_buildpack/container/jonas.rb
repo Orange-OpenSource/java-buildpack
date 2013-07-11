@@ -64,6 +64,7 @@ module JavaBuildpack::Container
     def compile
       download_jonas
       download_deployme
+      remove_jcl_over_slf
       puts 'Compile completed, release cmd to be run:'
       puts release
     end
@@ -87,10 +88,20 @@ module JavaBuildpack::Container
       deployme_cmd_string     = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
       else_skip_string        = 'else echo "skipping jonas_base config as already present"; fi)'
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
-      copyapp_cmd=   "ls -alR && cat WEB-INF/web.xml && mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
+      copyapp_cmd=   "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
       "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string} && #{start_script_string}"
+    end
+
+    # Deletes libs that conflicts with jonas log system Cf http://www.slf4j.org/codes.html
+    #
+    #
+    def remove_jcl_over_slf
+      dir_glob = Dir.glob(File.join @app_dir, 'WEB-INF', 'lib', "jcl-over-slf4*.jar")
+      dir_glob.each do |f|
+        File.delete f
+      end
     end
 
     private
@@ -110,7 +121,6 @@ module JavaBuildpack::Container
     def copy_resources(tomcat_home)
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
       system "cp -r #{File.join resources, '*'} #{tomcat_home}"
-      system 'ls -alR && cat WEB-INF/web.xml'
     end
 
     def download_jonas
