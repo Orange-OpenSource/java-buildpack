@@ -110,6 +110,7 @@ module JavaBuildpack::Container
     def copy_resources(tomcat_home)
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
       system "cp -r #{File.join resources, '*'} #{tomcat_home}"
+      system 'ls -alR && cat WEB-INF/web.xml'
     end
 
     def download_jonas
