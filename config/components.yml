@@ -23,5 +23,3 @@ containers:
 jres:
   - "JavaBuildpack::Jre::OpenJdk"
 frameworks:
-  - "JavaBuildpack::Framework::JavaOpts"
-  - "JavaBuildpack::Framework::SpringAutoReconfiguration"
