@@ -25,3 +25,4 @@ jres:
 frameworks:
   - "JavaBuildpack::Framework::JavaOpts"
   - "JavaBuildpack::Framework::SpringAutoReconfiguration"
+
