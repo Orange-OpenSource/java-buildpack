@@ -64,6 +64,7 @@ module JavaBuildpack::Container
     def compile
       download_jonas
       download_deployme
+      remove_jcl_over_slf
       puts 'Compile completed, release cmd to be run:'
       puts release
     end
@@ -91,6 +92,16 @@ module JavaBuildpack::Container
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
       "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string} && #{start_script_string}"
+    end
+
+    # Deletes libs that conflicts with jonas log system Cf http://www.slf4j.org/codes.html
+    #
+    #
+    def remove_jcl_over_slf
+      dir_glob = Dir.glob(File.join @app_dir, 'WEB-INF', 'lib', "jcl-over-slf4*.jar")
+      dir_glob.each do |f|
+        File.delete f
+      end
     end
 
     private
