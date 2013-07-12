@@ -176,13 +176,7 @@ module JavaBuildpack::Container
 
 
     def self.find_deployme(app_dir, configuration)
-      if web_inf? app_dir
-        version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration["deployme"])
-      else
-        version = nil
-        uri = nil
-      end
-
+      version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration["deployme"])
       return version, uri
     end
 
