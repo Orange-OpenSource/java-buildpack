@@ -35,7 +35,7 @@ module JavaBuildpack::Container
       $stderr = StringIO.new
     end
 
-    it 'should detect WEB-INF' do
+    it 'should detect WEB-INF in wars' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       detected = Jonas.new(
@@ -45,7 +45,34 @@ module JavaBuildpack::Container
       expect(detected).to eq('jonas-5.2.1')
     end
 
-    it 'should not detect when WEB-INF is absent' do
+    #
+    # See JEE specifications http: // java.sun.com/j2ee/j2ee-1_4-fr-spec.pdf section "Application Assembly and Deployment".
+    # The URL prefix onto which the application URLs will be made externally visible on the application container.
+    # Typically defined in J2EE applications in META-INF\application.xml, one per war.
+    # This is typically configured in the maven packaging of the application using the maven-ear-plugin.
+    # See http : //m aven.apache.org/plugins/maven-ear-plugin/examples/customizing-context-root.html #
+    #
+    it 'should detect META-INF/application.xml in ears' do
+      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
+        .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
+      detected = Jonas.new(
+          :app_dir => 'spec/fixtures/container_jonas',
+          :configuration => {}).detect
+
+      expect(detected).to eq('jonas-5.2.1')
+    end
+
+    it 'should not detect when META-INF/application.xml is absent in ears' do
+      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
+      .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
+      detected = Jonas.new(
+          :app_dir => 'spec/fixtures/container_jonas_no_application_xml',
+          :configuration => {}).detect
+
+      expect(detected).to be_nil
+    end
+
+    it 'should not detect when WEB-INF is absent in wars' do
       detected = Jonas.new(
           :app_dir => 'spec/fixtures/container_main',
           :configuration => {}).detect

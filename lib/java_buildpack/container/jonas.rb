@@ -39,7 +39,7 @@ module JavaBuildpack::Container
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
-      @jonas_version, @tomcat_uri = Jonas.find_tomcat(@app_dir, @configuration)
+      @jonas_version, @tomcat_uri = Jonas.find_jonas(@app_dir, @configuration)
       @support_version, @support_uri = Jonas.find_support(@app_dir, @configuration)
       @deployme_version, @deployme_uri = Jonas.find_deployme(@app_dir, @configuration)
 
@@ -117,6 +117,8 @@ module JavaBuildpack::Container
     JONAS_BASE = '.jonas_base'.freeze
 
     WEB_INF_DIRECTORY = 'WEB-INF'.freeze
+    META_INF_DIRECTORY = 'META-INF'.freeze
+    APPLICATION_XML= 'application.xml'.freeze
 
     def copy_resources(tomcat_home)
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
@@ -157,10 +159,10 @@ module JavaBuildpack::Container
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    def self.find_tomcat(app_dir, configuration)
-      if web_inf? app_dir
+    def self.find_jonas(app_dir, configuration)
+      if web_inf? app_dir or application_xml? app_dir
         version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration) do |version|
-          raise "Malformed Tomcat version #{version}: too many version components" if version[3]
+          raise "Malformed Jonas version #{version}: too many version components" if version[3]
         end
       else
         version = nil
@@ -171,6 +173,7 @@ module JavaBuildpack::Container
     rescue => e
       raise RuntimeError, "Tomcat container error: #{e.message}", e.backtrace
     end
+
 
     def self.find_deployme(app_dir, configuration)
       if web_inf? app_dir
@@ -221,6 +224,11 @@ module JavaBuildpack::Container
     def self.web_inf?(app_dir)
       File.exists? File.join(app_dir, WEB_INF_DIRECTORY)
     end
+
+    def self.application_xml?(app_dir)
+      File.exists? File.join(app_dir, META_INF_DIRECTORY, APPLICATION_XML)
+    end
+
 
   end
 
