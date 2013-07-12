@@ -13,9 +13,11 @@ Tags are printed to standard output by the buildpack detect script
 
 Jonas traces appear in app/.jonas_base/logs including JUL traces.
 
+Automatic removal of slf4j-jcl from war apps classpaths but not from ear apps
 
 ## Limitations
 
+- EAR apps are only detected/supported if they have a '.war' suffix. Suspecting this to be linked with CC models.
 - WAR applications are accessible through the "app" contextRoot.
 - DataSources are not yet generated for services bound in CF
 - Failed application start is not reliably detected: Tomcat support jar is not yet added in the tomcat lifecyle
