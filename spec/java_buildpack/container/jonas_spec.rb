@@ -85,7 +85,7 @@ module JavaBuildpack::Container
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       expect { Jonas.new(
           :app_dir => 'spec/fixtures/container_tomcat',
-          :configuration => {}).detect }.to raise_error(/Malformed\ Jonas\ version/)
+          :configuration => {}).detect }.to raise_error(/Malformed\ Tomcat\ version/)
     end
 
     it 'should remove jcl-over-slf4 jars from WEB-INF/lib as it conflicts with jonas embedded slf4j-jcl' do

@@ -160,7 +160,7 @@ module JavaBuildpack::Container
     end
 
     def self.find_jonas(app_dir, configuration)
-      if web_inf? app_dir or application_xml? app_dir
+      if supported?(app_dir)
         version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration) do |version|
           raise "Malformed Jonas version #{version}: too many version components" if version[3]
         end
@@ -174,14 +174,26 @@ module JavaBuildpack::Container
       raise RuntimeError, "Tomcat container error: #{e.message}", e.backtrace
     end
 
+    # Whether jonas is supported for the current app
+    #
+    def self.supported?(app_dir)
+      web_inf? app_dir or application_xml? app_dir
+    end
+
 
     def self.find_deployme(app_dir, configuration)
-      version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration["deployme"])
+      if supported? app_dir
+        version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration["deployme"])
+      else
+        version = nil
+        uri = nil
+      end
+
       return version, uri
     end
 
     def self.find_support(app_dir, configuration)
-      if web_inf? app_dir
+      if supported? app_dir
         version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration[KEY_SUPPORT])
       else
         version = nil
