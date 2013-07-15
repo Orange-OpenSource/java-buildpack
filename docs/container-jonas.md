@@ -15,11 +15,10 @@ Tags are printed to standard output by the buildpack detect script
 
 Jonas traces appear in app/.jonas_base/logs including JUL traces.
 
-Automatic removal of slf4j-jcl from war apps classpaths but not from ear apps
 
-## Limitations
+## Functional limitations
 
-- EAR apps are only detected/supported if they have a '.war' suffix. Suspecting this to be linked with CC models.
+- EAR apps are only detected/supported by cf CLI if they have a '.war' suffix. See [discussion]:https://groups.google.com/a/cloudfoundry.org/forum/#!topic/vcap-dev/Gfvir03mXk8
 - WAR applications are accessible through the "app" contextRoot, ideally they should be accessible at the ROOT level
 - DataSources are not yet generated for services bound in CF
 - The droplet is still too large: 198Mb. This slows down the staging process (around 4ms vs 10-30s for plain tomcat).
@@ -29,6 +28,7 @@ Automatic removal of slf4j-jcl from war apps classpaths but not from ear apps
   of unnecessary jonas binaires.
 - Jonas embeds some classes in its classpath that may conflict with application embedded jars: spring, cxf, javax.validation,
   see suggested classloader filtering below as a workaround
+- Automatic removal of slf4j-jcl is performed from war apps classpaths but not yet from ear apps.
 
 ## Technical debt and next refactorings
 
@@ -36,6 +36,7 @@ Automatic removal of slf4j-jcl from war apps classpaths but not from ear apps
 - too many operations are performed in the start command, altough jonas jasmine deployme command is'nt helping much with buildpack requirements (dynamic port resolution + dynamic datasource generation)
 - the start cmd generation in jonas.rb could benefit from ERB templating.
 - lack unit tests on topology.xml
+- need uniform handling of wars and ears (e.g. Automatic removal of slf4j-jcl) on both top-level wars and wars within ears
 
 ## Planned improvements
 
