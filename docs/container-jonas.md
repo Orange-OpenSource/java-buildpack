@@ -9,6 +9,8 @@ The Jonas Container allows web application to be run within the [OW2 Jonas JEE C
     <td><strong>Tags</strong></td><td><tt>tomcat-&lang;version&rang;</tt></td>
   </tr>
 </table>
+
+
 Tags are printed to standard output by the buildpack detect script
 
 Jonas traces appear in app/.jonas_base/logs including JUL traces.
@@ -18,14 +20,19 @@ Automatic removal of slf4j-jcl from war apps classpaths but not from ear apps
 ## Limitations
 
 - EAR apps are only detected/supported if they have a '.war' suffix. Suspecting this to be linked with CC models.
-- WAR applications are accessible through the "app" contextRoot.
+- WAR applications are accessible through the "app" contextRoot, ideally they should be accessible at the ROOT level
 - DataSources are not yet generated for services bound in CF
+- The droplet is still too large: 198Mb. This slows down the staging process (around 4ms vs 10-30s for plain tomcat).
+  More triming of unused Jonas binaries would be useful. See [server profiles]:http://www.slideshare.net/sauthieg/jonas-51-application-server-profiles and additional [slides]:http://ow2.org/xwiki/bin/download/Events/OW2+Day+Berlin/JOnAS-Berlin16may-8.pdf
 - Failed application start is not reliably detected: Tomcat support jar is not yet added in the tomcat lifecyle
-- The list of activated jonas can not yet be configured through th
-- Jonas embeds some classes in its classpath that may conflict with application embedded jars: spring, cxf, javax.validation, see suggested classloader filtering below as a workaround
+- The list of activated jonas services can not yet be configured through the jonas.yml config files. This could be leveraged to control the triming
+  of unnecessary jonas binaires.
+- Jonas embeds some classes in its classpath that may conflict with application embedded jars: spring, cxf, javax.validation,
+  see suggested classloader filtering below as a workaround
 
 ## Technical debt and next refactorings
 
+- lack integration tests supported by upcoming java-buildpack support
 - too many operations are performed in the start command, altough jonas jasmine deployme command is'nt helping much with buildpack requirements (dynamic port resolution + dynamic datasource generation)
 - the start cmd generation in jonas.rb could benefit from ERB templating.
 - lack unit tests on topology.xml
@@ -53,7 +60,7 @@ The container can be configured by modifying the [`config/jonas.yml`][jonas_yml]
 ## Credits
 
 This container is largely inspired from the tomcat container. Thanks to the cloudfoundry team for the great extensible
-java-buildback
+java-buildback.
 
 ## Suggested classloader_filtering
 
