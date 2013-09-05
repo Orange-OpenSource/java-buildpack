@@ -163,7 +163,7 @@ module JavaBuildpack::Container
     def self.find_jonas(app_dir, configuration)
       if supported?(app_dir)
         version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-          fail "Malformed Tomcat version #{candidate_version}: too many version components" if candidate_version[3]
+          fail "Malformed Jonas version #{candidate_version}: too many version components" if candidate_version[3]
         end
       else
         version = nil
