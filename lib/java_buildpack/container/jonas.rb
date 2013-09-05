@@ -178,7 +178,7 @@ module JavaBuildpack::Container
     # Whether jonas is supported for the current app
     #
     def self.supported?(app_dir)
-      web_inf? app_dir || application_xml? app_dir
+      (web_inf? app_dir) || (application_xml? app_dir)
     end
 
     def self.find_deployme(app_dir, configuration)
@@ -189,7 +189,7 @@ module JavaBuildpack::Container
         uri = nil
       end
 
-      version, uri
+      return version, uri # rubocop:disable RedundantReturn
     end
 
     def self.find_support(app_dir, configuration)
@@ -200,7 +200,7 @@ module JavaBuildpack::Container
         uri = nil
       end
 
-      version, uri
+      return version, uri # rubocop:disable RedundantReturn
     end
 
     def id(version)
