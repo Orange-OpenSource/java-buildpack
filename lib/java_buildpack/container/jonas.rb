@@ -1,3 +1,4 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright (c) 2013 the original author or authors.
 #
@@ -77,7 +78,7 @@ module JavaBuildpack::Container
       if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
-      export_base_vars_string     = "export JAVA_HOME JAVA_OPTS"
+      export_base_vars_string     = 'export JAVA_HOME JAVA_OPTS'
       export_deployme_vars_string     = "export JONAS_ROOT JONAS_BASE"
       deployme_var_string     = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
       deployme_root = File.join JONAS_ROOT, 'deployme'
@@ -88,7 +89,7 @@ module JavaBuildpack::Container
       deployme_cmd_string     = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
       else_skip_string        = 'else echo "skipping jonas_base config as already present"; fi)'
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
-      copyapp_cmd=   "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
+      copyapp_cmd =   "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
       "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string} && #{start_script_string}"
@@ -98,7 +99,7 @@ module JavaBuildpack::Container
     #
     #
     def remove_jcl_over_slf
-      dir_glob = Dir.glob(File.join @app_dir, 'WEB-INF', 'lib', "jcl-over-slf4*.jar")
+      dir_glob = Dir.glob(File.join @app_dir, 'WEB-INF', 'lib', 'jcl-over-slf4*.jar')
       dir_glob.each do |f|
         File.delete f
       end
@@ -118,7 +119,7 @@ module JavaBuildpack::Container
 
     WEB_INF_DIRECTORY = 'WEB-INF'.freeze
     META_INF_DIRECTORY = 'META-INF'.freeze
-    APPLICATION_XML= 'application.xml'.freeze
+    APPLICATION_XML = 'application.xml'.freeze
 
     def copy_resources(tomcat_home)
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
@@ -129,7 +130,7 @@ module JavaBuildpack::Container
       download_start_time = Time.now
       print "-----> Downloading Jonas #{@jonas_version} from #{@tomcat_uri} "
 
-      JavaBuildpack::Util::ApplicationCache.new.get(@tomcat_uri) do |file|  # TODO Use global cache #50175265
+      JavaBuildpack::Util::ApplicationCache.new.get(@tomcat_uri) do |file|  # TODO: Use global cache #50175265
         puts "(#{(Time.now - download_start_time).duration})"
         expand(file, @configuration)
       end
@@ -139,7 +140,7 @@ module JavaBuildpack::Container
       download_start_time = Time.now
       print "-----> Downloading deployme#{@deployme_version} from #{@deployme_uri} "
 
-      JavaBuildpack::Util::ApplicationCache.new.get(@deployme_uri) do |file|  # TODO Use global cache #50175265
+      JavaBuildpack::Util::ApplicationCache.new.get(@deployme_uri) do |file|  # TODO: Use global cache #50175265
         system "cp #{file.path} #{File.join jonas_root, 'deployme', 'deployme.jar'}"
         puts "(#{(Time.now - download_start_time).duration})"
       end
@@ -161,8 +162,8 @@ module JavaBuildpack::Container
 
     def self.find_jonas(app_dir, configuration)
       if supported?(app_dir)
-        version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration) do |version|
-          raise "Malformed Jonas version #{version}: too many version components" if version[3]
+        version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+          fail "Malformed Tomcat version #{candidate_version}: too many version components" if candidate_version[3]
         end
       else
         version = nil
@@ -177,19 +178,18 @@ module JavaBuildpack::Container
     # Whether jonas is supported for the current app
     #
     def self.supported?(app_dir)
-      web_inf? app_dir or application_xml? app_dir
+      web_inf? app_dir || application_xml? app_dir
     end
-
 
     def self.find_deployme(app_dir, configuration)
       if supported? app_dir
-        version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration["deployme"])
+        version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration['deployme'])
       else
         version = nil
         uri = nil
       end
 
-      return version, uri
+      version, uri
     end
 
     def self.find_support(app_dir, configuration)
@@ -200,13 +200,12 @@ module JavaBuildpack::Container
         uri = nil
       end
 
-      return version, uri
+      version, uri
     end
 
     def id(version)
       "jonas-#{version}"
     end
-
 
     def root
       File.join jonas_deploy, 'ROOT'
@@ -215,6 +214,7 @@ module JavaBuildpack::Container
     def jonas_root
       File.join @app_dir, JONAS_ROOT
     end
+
     def jonas_base
       File.join @app_dir, JONAS_BASE
     end
@@ -234,7 +234,6 @@ module JavaBuildpack::Container
     def self.application_xml?(app_dir)
       File.exists? File.join(app_dir, META_INF_DIRECTORY, APPLICATION_XML)
     end
-
 
   end
 
