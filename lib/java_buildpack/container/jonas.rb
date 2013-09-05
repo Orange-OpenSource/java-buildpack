@@ -79,7 +79,7 @@ module JavaBuildpack::Container
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
       export_base_vars_string     = 'export JAVA_HOME JAVA_OPTS'
-      export_deployme_vars_string     = "export JONAS_ROOT JONAS_BASE"
+      export_deployme_vars_string     = 'export JONAS_ROOT JONAS_BASE'
       deployme_var_string     = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
       deployme_root = File.join JONAS_ROOT, 'deployme'
       topology_xml_erb_file = File.join deployme_root, 'topology.xml.erb'
