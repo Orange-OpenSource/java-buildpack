@@ -1,3 +1,4 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright (c) 2013 the original author or authors.
 #
@@ -39,8 +40,9 @@ module JavaBuildpack::Container
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       detected = Jonas.new(
-          :app_dir => 'spec/fixtures/container_tomcat',
-          :configuration => {}).detect
+          app_dir: 'spec/fixtures/container_tomcat',
+          configuration:  {}
+      ).detect
 
       expect(detected).to eq('jonas-5.2.1')
     end
@@ -56,8 +58,9 @@ module JavaBuildpack::Container
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       detected = Jonas.new(
-          :app_dir => 'spec/fixtures/container_jonas',
-          :configuration => {}).detect
+          app_dir: 'spec/fixtures/container_tomcat',
+          configuration:  {}
+      ).detect
 
       expect(detected).to eq('jonas-5.2.1')
     end
@@ -66,16 +69,18 @@ module JavaBuildpack::Container
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
       .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       detected = Jonas.new(
-          :app_dir => 'spec/fixtures/container_jonas_no_application_xml',
-          :configuration => {}).detect
+          app_dir: 'spec/fixtures/container_jonas_no_application_xml',
+          configuration:  {}
+      ).detect
 
       expect(detected).to be_nil
     end
 
     it 'should not detect when WEB-INF is absent in wars' do
       detected = Jonas.new(
-          :app_dir => 'spec/fixtures/container_main',
-          :configuration => {}).detect
+          app_dir: 'spec/fixtures/container_main',
+          configuration:  {}
+      ).detect
 
       expect(detected).to be_nil
     end
@@ -84,8 +89,9 @@ module JavaBuildpack::Container
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JavaBuildpack::Util::TokenizedVersion.new('7.0.40_0')) if block }
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
       expect { Jonas.new(
-          :app_dir => 'spec/fixtures/container_tomcat',
-          :configuration => {}).detect }.to raise_error(/Malformed\ Jonas\ version/)
+          app_dir: 'spec/fixtures/container_tomcat',
+          configuration: {}
+      ).detect }.to raise_error(/Malformed\ Jonas\ version/)
     end
 
     it 'should remove jcl-over-slf4 jars from WEB-INF/lib as it conflicts with jonas embedded slf4j-jcl' do
@@ -103,10 +109,11 @@ module JavaBuildpack::Container
         touch(dir, 'random.jar')
 
         command = Jonas.new(
-            :app_dir => root,
-            :java_home => 'test-java-home',
-            :java_opts => [ 'test-opt-2', 'test-opt-1' ],
-            :configuration => {}).remove_jcl_over_slf
+            app_dir: root,
+            java_home: 'test-java-home',
+            java_opts: [ 'test-opt-2', 'test-opt-1' ],
+            configuration: {}
+        ).remove_jcl_over_slf
 
 
         expected_deleted_jars = Dir.glob(File.join dir, 'jcl-over-slf4*.jar')
@@ -130,8 +137,8 @@ module JavaBuildpack::Container
         application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
 
         Jonas.new(
-          :app_dir => root,
-          :configuration => { }
+          app_dir: root,
+          configuration: {}
         ).compile
 
         jonas_root = File.join root, '.jonas_root'
@@ -165,10 +172,11 @@ module JavaBuildpack::Container
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
 
       command = Jonas.new(
-        :app_dir => 'spec/fixtures/container_jonas',
-        :java_home => 'test-java-home',
-        :java_opts => [ 'test-opt-2', 'test-opt-1' ],
-        :configuration => {}).release
+        app_dir: 'spec/fixtures/container_jonas',
+        java_home: 'test-java-home',
+        java_opts: ['test-opt-2', 'test-opt-1'],
+        configuration: {}
+      ).release
 
 
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
