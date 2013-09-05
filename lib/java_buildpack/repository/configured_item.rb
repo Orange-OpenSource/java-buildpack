@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,8 +29,8 @@ module JavaBuildpack::Repository
     # @option configuration [String] :repository_root the root directory of the repository
     # @option configuration [String] :version the version of the file to resolve
     # @param [Block, nil] version_validator an optional version validation block
-    # @return [JavaBuildpack::Util::TokenizedVersion] the chosen version of the file
     # @return [String] the URI of the chosen version of the file
+    # @return [JavaBuildpack::Util::TokenizedVersion] the chosen version of the file
     def self.find_item(configuration, &version_validator)
       repository_root = ConfiguredItem.repository_root(configuration)
       version = ConfiguredItem.version(configuration)
@@ -40,22 +41,22 @@ module JavaBuildpack::Repository
 
     private
 
-    KEY_REPOSITORY_ROOT = 'repository_root'.freeze
+      KEY_REPOSITORY_ROOT = 'repository_root'.freeze
 
-    KEY_VERSION = 'version'.freeze
+      KEY_VERSION = 'version'.freeze
 
-    def self.index(repository_root)
-      RepositoryIndex.new(repository_root)
-    end
+      def self.index(repository_root)
+        RepositoryIndex.new(repository_root)
+      end
 
-    def self.repository_root(configuration)
-      raise "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository." unless configuration.has_key? KEY_REPOSITORY_ROOT
-      configuration[KEY_REPOSITORY_ROOT]
-    end
+      def self.repository_root(configuration)
+        raise "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository." unless configuration.key? KEY_REPOSITORY_ROOT
+        configuration[KEY_REPOSITORY_ROOT]
+      end
 
-    def self.version(configuration)
-      JavaBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
-    end
+      def self.version(configuration)
+        JavaBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
+      end
 
   end
 

@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +20,22 @@ require 'open3'
 describe 'release script', :integration do
 
   it 'should return zero if success' do
-    with_memory_limit('1G') do
-      Open3.popen3("bin/release spec/fixtures/integration_valid") do |stdin, stdout, stderr, wait_thr|
-        expect(wait_thr.value).to be_success
+    Dir.mktmpdir do |root|
+      FileUtils.cp_r 'spec/fixtures/integration_valid/.', root
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
+          expect(wait_thr.value).to be_success
+        end
       end
+
+    end
+  end
+
+  it 'should fail to release when no containers detect' do
+    Dir.mktmpdir do |root|
+      error = Open3.capture3("bin/release #{root}")[1]
+      expect(error).to match(/No supported application type was detected/)
     end
   end
 

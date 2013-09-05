@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +37,7 @@ module JavaBuildpack::Framework
     #
     # @return [String] returns +java-opts+ if Java options have been set by the user
     def detect
-      @configuration.has_key?(CONFIGURATION_PROPERTY) ? CONTAINER_NAME : nil
+      @configuration.key?(CONFIGURATION_PROPERTY) ? CONTAINER_NAME : nil
     end
 
     # Ensures that none of the Java options specify memory configurations
@@ -57,20 +58,20 @@ module JavaBuildpack::Framework
 
     private
 
-    CONFIGURATION_PROPERTY = 'java_opts'.freeze
+      CONFIGURATION_PROPERTY = 'java_opts'.freeze
 
-    CONTAINER_NAME = 'java-opts'.freeze
+      CONTAINER_NAME = 'java-opts'.freeze
 
-    def memory_option?(option)
-      option =~/-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
-        option =~ /-Xss/
-    end
-
-    def parsed_java_opts
-      @configuration[CONFIGURATION_PROPERTY].shellsplit.map do |java_opt|
-        java_opt.gsub(/([\s])/, '\\\\\1')
+      def memory_option?(option)
+        option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
+          option =~ /-Xss/
       end
-    end
+
+      def parsed_java_opts
+        @configuration[CONFIGURATION_PROPERTY].shellsplit.map do |java_opt|
+          java_opt.gsub(/([\s])/, '\\\\\1')
+        end
+      end
 
   end
 

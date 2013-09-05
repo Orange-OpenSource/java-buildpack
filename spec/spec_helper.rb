@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +19,9 @@ SimpleCov.start do
   add_filter 'spec'
 end
 
+require 'codeclimate-test-reporter'
+CodeClimate::TestReporter.start
+
 require 'tmpdir'
 require 'webmock/rspec'
 
@@ -26,3 +30,12 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
 end
+
+# Ensure a logger exists for any class under test that needs one.
+require 'fileutils'
+require 'java_buildpack/diagnostics/common'
+require 'java_buildpack/diagnostics/logger_factory'
+tmpdir = Dir.tmpdir
+diagnostics_directory = File.join(tmpdir, JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
+FileUtils.rm_rf diagnostics_directory
+JavaBuildpack::Diagnostics::LoggerFactory.create_logger tmpdir

@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'java_buildpack/diagnostics/logger_factory'
 require 'java_buildpack/jre'
 require 'java_buildpack/jre/memory/memory_limit'
 require 'java_buildpack/jre/memory/memory_size'
@@ -33,6 +35,7 @@ module JavaBuildpack::Jre
     # @param [Array<String>] valid_heuristics the valid heuristics keys
     # @param [Hash<String, String>] java_opts a mapping from a memory type to a +JAVA_OPTS+ option
     def initialize(sizes, heuristics, valid_sizes, valid_heuristics, java_opts)
+      @logger = JavaBuildpack::Diagnostics::LoggerFactory.get_logger
       validate 'size', valid_sizes, sizes.keys
       validate 'heuristic', valid_heuristics, heuristics.keys
 
@@ -60,7 +63,7 @@ module JavaBuildpack::Jre
       issue_memory_wastage_warning(buckets) if memory_limit
       issue_close_to_default_warnings(buckets, @heuristics, memory_limit)
 
-      buckets.map { |type, bucket| "#{@java_opts[type]}#{bucket.size}" if bucket.size && @java_opts.has_key?(type) }.compact
+      buckets.map { |type, bucket| "#{@java_opts[type]}#{bucket.size}" if bucket.size && @java_opts.key?(type) }.compact
     end
 
     private
@@ -70,7 +73,7 @@ module JavaBuildpack::Jre
     CLOSE_TO_DEFAULT_FACTOR = 0.1
 
     def balance_buckets(sizes, buckets, memory_limit)
-      total_excess = MemorySize.ZERO
+      total_excess = MemorySize::ZERO
       total_adjustable_weighting = 0
 
       buckets.each_value do |bucket|
@@ -81,7 +84,7 @@ module JavaBuildpack::Jre
 
       buckets.each_value do |bucket|
         bucket.adjust(total_excess, total_adjustable_weighting)
-        raise "Total memory #{memory_limit} exceeded by configured memory #{sizes}" if bucket.size && bucket.size < MemorySize.ZERO
+        raise "Total memory #{memory_limit} exceeded by configured memory #{sizes}" if bucket.size && bucket.size < MemorySize::ZERO
       end
     end
 
@@ -103,7 +106,7 @@ module JavaBuildpack::Jre
         total_weighting += weighting
       end
 
-      raise "Invalid configuration: sum of weightings is greater than 1" if total_weighting > 1
+      raise 'Invalid configuration: sum of weightings is greater than 1' if total_weighting > 1
 
       buckets
     end
@@ -111,7 +114,7 @@ module JavaBuildpack::Jre
     def issue_memory_wastage_warning(buckets)
       native_bucket = buckets['native']
       if native_bucket && native_bucket.size > native_bucket.default_size * NATIVE_MEMORY_WARNING_FACTOR
-        $stderr.puts "-----> WARNING: there is #{NATIVE_MEMORY_WARNING_FACTOR} times more spare native memory than the default, so configured Java memory may be too small."
+        @logger.warn "There is #{NATIVE_MEMORY_WARNING_FACTOR} times more spare native memory than the default, so configured Java memory may be too small."
       end
     end
 
@@ -128,17 +131,20 @@ module JavaBuildpack::Jre
     def issue_close_to_default_warnings(buckets, heuristics, memory_limit)
       # Check each specified memory size to see if it is close to the default.
       buckets.each do |type, bucket|
-        if @sizes[type]
-          default_size = bucket.default_size
-          if default_size
-            actual_size = bucket.size
-            if default_size != MemorySize.ZERO
-              factor = ((actual_size - default_size) / default_size).abs
-            end
-            if (default_size == MemorySize.ZERO && actual_size == MemorySize.ZERO) || factor < CLOSE_TO_DEFAULT_FACTOR
-              $stderr.puts "-----> WARNING: the configured value #{actual_size} of memory size #{type} is close to the default value #{default_size}. Consider deleting the configured value and taking the default."
-            end
-          end
+        check_close_to_default(type, bucket) if @sizes[type]
+      end
+    end
+
+    def check_close_to_default(type, bucket)
+      default_size = bucket.default_size
+      if default_size
+        actual_size = bucket.size
+        if default_size != MemorySize::ZERO
+          factor = ((actual_size - default_size) / default_size).abs
+          @logger.debug { "factor for memory size #{type} is #{factor}" }
+        end
+        if (default_size == MemorySize::ZERO && actual_size == MemorySize::ZERO) || (factor && (factor < CLOSE_TO_DEFAULT_FACTOR))
+          @logger.warn "The configured value #{actual_size} of memory size #{type} is close to the default value #{default_size}. Consider deleting the configured value and taking the default."
         end
       end
     end

@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,40 +65,54 @@ module JavaBuildpack::Container
       java_opts_string = ContainerUtils.space(ContainerUtils.to_java_opts_s(@java_opts))
       main_class_string = ContainerUtils.space(main_class)
       arguments_string = ContainerUtils.space(arguments)
+      port_string = ContainerUtils.space(port)
 
-      "#{java_string}#{classpath_string}#{java_opts_string}#{main_class_string}#{arguments_string}"
+      "#{java_string}#{classpath_string}#{java_opts_string}#{main_class_string}#{arguments_string}#{port_string}"
     end
 
     private
 
-    MAIN_CLASS_PROPERTY = 'java_main_class'.freeze
+      MAIN_CLASS_PROPERTY = 'java_main_class'.freeze
 
-    ARGUMENTS_PROPERTY = 'arguments'.freeze
+      ARGUMENTS_PROPERTY = 'arguments'.freeze
 
-    CONTAINER_NAME = 'java-main'.freeze
+      CLASS_PATH_PROPERTY = 'Class-Path'.freeze
 
-    MANIFEST_PROPERTY = 'Main-Class'.freeze
+      CONTAINER_NAME = 'java-main'.freeze
 
-    def classpath(app_dir, lib_directory)
-      classpath = ['.']
-      classpath.concat ContainerUtils.libs(app_dir, lib_directory)
+      MANIFEST_PROPERTY = 'Main-Class'.freeze
 
-      "-cp #{classpath.join(':')}"
-    end
+      def arguments
+        @configuration[ARGUMENTS_PROPERTY]
+      end
 
-    def manifest
-      manifest_file = File.join(@app_dir, 'META-INF', 'MANIFEST.MF')
-      manifest_file = File.exists?(manifest_file) ? manifest_file : nil
-      JavaBuildpack::Util::Properties.new(manifest_file)
-    end
+      def classpath(app_dir, lib_directory)
+        classpath = ['.']
+        classpath.concat ContainerUtils.libs(app_dir, lib_directory)
+        classpath.concat manifest_class_path
 
-    def main_class
-      @configuration[MAIN_CLASS_PROPERTY] || manifest[MANIFEST_PROPERTY]
-    end
+        "-cp #{classpath.join(':')}"
+      end
 
-    def arguments
-      @configuration[ARGUMENTS_PROPERTY]
-    end
+      def main_class
+        @configuration[MAIN_CLASS_PROPERTY] || manifest[MANIFEST_PROPERTY]
+      end
+
+      def manifest
+        manifest_file = File.join(@app_dir, 'META-INF', 'MANIFEST.MF')
+        manifest_file = File.exists?(manifest_file) ? manifest_file : nil
+        JavaBuildpack::Util::Properties.new(manifest_file)
+      end
+
+      def manifest_class_path
+        value = manifest[CLASS_PATH_PROPERTY]
+        value.nil? ? [] : value.split(' ')
+      end
+
+      def port
+        main_class =~ /^org\.springframework\.boot\.loader\.[JW]arLauncher$/ ? '--server.port=$PORT' : nil
+      end
+
   end
 
 end

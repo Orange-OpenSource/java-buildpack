@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +17,12 @@
 require 'java_buildpack/repository'
 require 'java_buildpack/util/download_cache'
 require 'java_buildpack/repository/version_resolver'
+require 'rbconfig'
+require 'yaml'
 
 module JavaBuildpack::Repository
 
-# A repository index represents the index of repository containing various versions of a file.
+  # A repository index represents the index of repository containing various versions of a file.
   class RepositoryIndex
 
     # Creates a new repository index, populating it with values from an index file.
@@ -27,7 +30,7 @@ module JavaBuildpack::Repository
     # @param [String] repository_root the root of the repository to create the index for
     def initialize(repository_root)
       @index = {}
-      JavaBuildpack::Util::DownloadCache.new().get("#{repository_root}#{INDEX_PATH}") do |file| # TODO Use global cache #50175265
+      JavaBuildpack::Util::DownloadCache.new.get("#{canonical repository_root}#{INDEX_PATH}") do |file| # TODO: Use global cache #50175265
         @index.merge! YAML.load_file(file)
       end
     end
@@ -40,12 +43,44 @@ module JavaBuildpack::Repository
     def find_item(version)
       version = VersionResolver.resolve(version, @index.keys)
       uri = @index[version.to_s]
-      return version, uri
+      return version, uri # rubocop:disable RedundantReturn
     end
 
     private
 
     INDEX_PATH = '/index.yml'
+
+    def architecture
+      RbConfig::CONFIG['host_cpu']
+    end
+
+    def canonical(raw)
+      raw
+        .gsub(/\{platform\}/, platform)
+        .gsub(/\{architecture\}/, architecture)
+    end
+
+    def linux_platform
+      `lsb_release -cs`.strip
+    end
+
+    def osx_platform
+      version = `sw_vers -productVersion`
+
+      if version =~ /^10.8/
+        return 'mountainlion'
+      else
+        raise "Unsupported OS X version '#{version}'"
+      end
+    end
+
+    def platform
+      if RbConfig::CONFIG['host_os'] =~ /darwin/i
+        osx_platform
+      else
+        linux_platform
+      end
+    end
 
   end
 

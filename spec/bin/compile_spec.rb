@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,5 +19,12 @@ require 'open3'
 require 'tmpdir'
 
 describe 'compile script', :integration do
+
+  it 'should fail to compile when no containers detect' do
+    Dir.mktmpdir do |root|
+      error = Open3.capture3("bin/compile #{root} #{root}")[1]
+      expect(error).to match(/No supported application type was detected/)
+    end
+  end
 
 end

@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'fileutils'
+require 'java_buildpack/diagnostics/common'
 require 'java_buildpack/jre'
 require 'java_buildpack/jre/memory/memory_heuristics_openjdk_pre8'
 require 'java_buildpack/jre/memory/memory_heuristics_openjdk'
@@ -26,6 +29,9 @@ module JavaBuildpack::Jre
   # Encapsulates the detect, compile, and release functionality for selecting an OpenJDK JRE.
   class OpenJdk
 
+    # Filename of killjava script used to kill the JVM on OOM.
+    KILLJAVA_FILE_NAME = 'killjava'
+
     # Creates an instance, passing in an arbitrary collection of options.
     #
     # @param [Hash] context the context that is provided to the instance
@@ -33,12 +39,10 @@ module JavaBuildpack::Jre
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [Hash] :configuration the properties provided by the user
-    # @option context [Hash] :diagnostics the diagnostics information provided by the buildpack
     def initialize(context)
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
-      @diagnostics_directory = context[:diagnostics][:directory]
       @version, @uri = OpenJdk.find_openjdk(@configuration)
 
       context[:java_home].concat JAVA_HOME
@@ -59,18 +63,19 @@ module JavaBuildpack::Jre
       download_start_time = Time.now
       print "-----> Downloading OpenJDK #{@version} JRE from #{@uri} "
 
-      JavaBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO Use global cache #50175265
+      JavaBuildpack::Util::ApplicationCache.new.get(@uri) do |file| # TODO: Use global cache #50175265
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end
-      copy_resources
+      copy_killjava_script
     end
 
     # Build Java memory options and places then in +context[:java_opts]+
     #
     # @return [void]
     def release
-      @java_opts << "-XX:OnOutOfMemoryError=#{@diagnostics_directory}/killjava"
+      @java_opts << "-XX:OnOutOfMemoryError=./#{JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{KILLJAVA_FILE_NAME}"
+      @java_opts << '-Djava.io.tmpdir=$TMPDIR'
       @java_opts.concat memory(@configuration)
     end
 
@@ -86,7 +91,7 @@ module JavaBuildpack::Jre
 
     def expand(file)
       expand_start_time = Time.now
-      print "-----> Expanding JRE to #{JAVA_HOME} "
+      print "       Expanding JRE to #{JAVA_HOME} "
 
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
@@ -118,12 +123,18 @@ module JavaBuildpack::Jre
     end
 
     def pre_8
-      @version < JavaBuildpack::Util::TokenizedVersion.new("1.8.0")
+      @version < JavaBuildpack::Util::TokenizedVersion.new('1.8.0')
     end
 
-    def copy_resources
+    def copy_killjava_script
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      system "cp -r #{resources}/* #{File.join @app_dir, @diagnostics_directory}"
+      killjava_file_content = File.read(File.join resources, KILLJAVA_FILE_NAME)
+      updated_content = killjava_file_content.gsub(/@@LOG_FILE_NAME@@/, JavaBuildpack::Diagnostics::LOG_FILE_NAME)
+      diagnostic_dir = JavaBuildpack::Diagnostics.get_diagnostic_directory @app_dir
+      FileUtils.mkdir_p diagnostic_dir
+      File.open(File.join(diagnostic_dir, KILLJAVA_FILE_NAME), 'w', 0755) do |file|
+        file.write updated_content
+      end
     end
 
   end
