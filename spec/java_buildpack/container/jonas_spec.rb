@@ -88,10 +88,12 @@ module JavaBuildpack::Container
     it 'should fail when a malformed version is detected' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JavaBuildpack::Util::TokenizedVersion.new('7.0.40_0')) if block }
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
-      expect { Jonas.new(
-          app_dir: 'spec/fixtures/container_tomcat',
-          configuration: {}
-      ).detect }.to raise_error(/Malformed\ Jonas\ version/)
+      expect do
+        Jonas.new(
+            app_dir: 'spec/fixtures/container_tomcat',
+            configuration: {}
+        ).detect
+      end.to raise_error(/Malformed\ Jonas\ version/)
     end
 
     it 'should remove jcl-over-slf4 jars from WEB-INF/lib as it conflicts with jonas embedded slf4j-jcl' do
@@ -101,17 +103,16 @@ module JavaBuildpack::Container
         JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JONAS_VERSION) if block }
         .and_return(JONAS_DETAILS, JONAS_SUPPORT_DETAILS)
 
-
         dir = File.join(root, 'WEB-INF', 'lib')
         Dir.mkdir dir
         touch(dir, 'jcl-over-slf4j.jar')
         touch(dir, 'jcl-over-slf4j-1.5.10.jar')
         touch(dir, 'random.jar')
 
-        command = Jonas.new(
+        Jonas.new(
             app_dir: root,
             java_home: 'test-java-home',
-            java_opts: [ 'test-opt-2', 'test-opt-1' ],
+            java_opts: %w(test-opt-2 test-opt-1),
             configuration: {}
         ).remove_jcl_over_slf
 
@@ -147,14 +148,11 @@ module JavaBuildpack::Container
         jonas_base = File.join root, '.jonas_base'
         expect(File.exists?(jonas_base)).to be_true
 
-        #catalina = File.join jonas_root, 'bin', 'catalina.sh'
-        #expect(File.exists?(catalina)).to be_true
-
-        #Filtered out
+        # Filtered out
         context = File.join jonas_root, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
         expect(File.exists?(context)).to be_false
 
-        #Not yet filtered out but present in stub
+        # Not yet filtered out but present in stub
         context = File.join jonas_root, 'lib/client.jar'
         expect(File.exists?(context)).to be_true
 
@@ -174,7 +172,7 @@ module JavaBuildpack::Container
       command = Jonas.new(
         app_dir: 'spec/fixtures/container_jonas',
         java_home: 'test-java-home',
-        java_opts: ['test-opt-2', 'test-opt-1'],
+        java_opts: %w(test-opt-2 test-opt-1),
         configuration: {}
       ).release
 
@@ -182,11 +180,11 @@ module JavaBuildpack::Container
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
       deployme_cmd = '(if test ! -d .jonas_base/deploy/app.war ; then ' +
-                     'JONAS_ROOT=.jonas_root JONAS_BASE=.jonas_base && '+
+                     'JONAS_ROOT=.jonas_root JONAS_BASE=.jonas_base && ' +
                      'export JONAS_ROOT JONAS_BASE && ' +
                      'erb .jonas_root/deployme/topology.xml.erb > .jonas_root/deployme/topology.xml && ' +
                      '$JAVA_HOME/bin/java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName && ' +
-                     'mkdir -p .jonas_base/deploy/app.war && cp -r --dereference * .jonas_base/deploy/app.war/; '+
+                     'mkdir -p .jonas_base/deploy/app.war && cp -r --dereference * .jonas_base/deploy/app.war/; ' +
                      'else echo "skipping jonas_base config as already present"; fi) && '
       containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
       expect(command).to eq(javaenv_cmd + deployme_cmd + containerstart_cmd)
