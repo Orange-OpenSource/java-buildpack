@@ -116,7 +116,6 @@ module JavaBuildpack::Container
             configuration: {}
         ).remove_jcl_over_slf
 
-
         expected_deleted_jars = Dir.glob(File.join dir, 'jcl-over-slf4*.jar')
 
         expected_random_file_untouched = Dir.glob(File.join dir, 'random.jar')
@@ -175,7 +174,6 @@ module JavaBuildpack::Container
         java_opts: %w(test-opt-2 test-opt-1),
         configuration: {}
       ).release
-
 
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
