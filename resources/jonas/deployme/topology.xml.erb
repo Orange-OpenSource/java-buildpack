@@ -32,7 +32,7 @@
                             <http_replication_activated>false</http_replication_activated>
                             <http_conf>
                                 <web_conf>
-                                    <port><%= ENV["PORT"] %></port>
+                                    <port>6666</port> <!-- 6666 is the magic port replaced at runtime by start cmd-->
                                     <maxThreads>120</maxThreads>
                                     <minSpareThreads>5</minSpareThreads>
                                     <maxSpareThreads>10</maxSpareThreads>

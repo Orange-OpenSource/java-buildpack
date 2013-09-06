@@ -177,13 +177,17 @@ module JavaBuildpack::Container
 
       deployme_cmd = jonas.deployme_cmd
 
-      expect(deployme_cmd).to eq('(if test ! -d .jonas_base/deploy/app.war ; then ' +
+      javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
+          'export JAVA_HOME JAVA_OPTS && '
+
+      expected_deployme_cmd = '(if test ! -d .jonas_base/deploy/app.war ; then ' +
           'JONAS_ROOT=.jonas_root JONAS_BASE=.jonas_base && ' +
           'export JONAS_ROOT JONAS_BASE && ' +
           'erb .jonas_root/deployme/topology.xml.erb > .jonas_root/deployme/topology.xml && ' +
           '$JAVA_HOME/bin/java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName && ' +
           'mkdir -p .jonas_base/deploy/app.war && cp -r --dereference * .jonas_base/deploy/app.war/; ' +
-          'else echo "skipping jonas_base config as already present"; fi) && ')
+          'else echo "skipping jonas_base config as already present"; fi) && '
+      expect(deployme_cmd).to eq(javaenv_cmd + expected_deployme_cmd)
 
     end
 
@@ -198,10 +202,11 @@ module JavaBuildpack::Container
           configuration: {}
       ).release
 
+      sed_cmd = 'sed --in-place=.orig -e "s/<Connector port=\"6666\" protocol=\"HTTP\/1.1\"/<Connector port=\"${PORT}\" protocol=\"HTTP\/1.1\"/" .jonas_base/conf/tomcat*-server.xml && '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
       containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
-      expect(command).to eq(javaenv_cmd + containerstart_cmd)
+      expect(command).to eq(sed_cmd + javaenv_cmd + containerstart_cmd)
     end
 
     def touch(dir, name)
