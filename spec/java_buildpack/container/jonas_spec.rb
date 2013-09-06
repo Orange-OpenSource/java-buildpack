@@ -177,7 +177,7 @@ module JavaBuildpack::Container
 
       deployme_cmd = jonas.deployme_cmd
 
-      cd_cmd = 'cd spec/fixtures/container_jonas & '
+      cd_cmd = 'cd spec/fixtures/container_jonas && '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
           'export JAVA_HOME JAVA_OPTS && '
 
