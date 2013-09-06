@@ -71,30 +71,6 @@ module JavaBuildpack::Container
       puts release
     end
 
-    def invoke_deployme
-      system(deployme_cmd)
-    end
-
-    def deployme_cmd
-      app_war_file = File.join JONAS_BASE, 'deploy', 'app.war'
-      if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
-      java_home_string = "JAVA_HOME=#{@java_home}"
-      java_opts_string = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
-      export_base_vars_string = 'export JAVA_HOME JAVA_OPTS'
-      export_deployme_vars_string = 'export JONAS_ROOT JONAS_BASE'
-      deployme_var_string = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
-      deployme_root = File.join JONAS_ROOT, 'deployme'
-      topology_xml_erb_file = File.join deployme_root, 'topology.xml.erb'
-      topology_xml_file = File.join deployme_root, 'topology.xml'
-      deployme_jar_file = File.join deployme_root, 'deployme.jar'
-      topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml_file}"
-      deployme_cmd_string = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
-      else_skip_string = 'else echo "skipping jonas_base config as already present"; fi)'
-      copyapp_cmd = "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
-
-      "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string}"
-    end
-
     # Creates the command to run the Tomcat application.
     #
     # @return [String] the command to run the application.
@@ -133,6 +109,33 @@ module JavaBuildpack::Container
     WEB_INF_DIRECTORY = 'WEB-INF'.freeze
     META_INF_DIRECTORY = 'META-INF'.freeze
     APPLICATION_XML = 'application.xml'.freeze
+
+    def invoke_deployme
+      system(deployme_cmd)
+    end
+
+    # Produces the deployme command to execute to generate the jonas configuration
+    #
+    # @return [String] shell command.
+    def deployme_cmd
+      app_war_file = File.join JONAS_BASE, 'deploy', 'app.war'
+      if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
+      java_home_string = "JAVA_HOME=#{@java_home}"
+      java_opts_string = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
+      export_base_vars_string = 'export JAVA_HOME JAVA_OPTS'
+      export_deployme_vars_string = 'export JONAS_ROOT JONAS_BASE'
+      deployme_var_string = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
+      deployme_root = File.join JONAS_ROOT, 'deployme'
+      topology_xml_erb_file = File.join deployme_root, 'topology.xml.erb'
+      topology_xml_file = File.join deployme_root, 'topology.xml'
+      deployme_jar_file = File.join deployme_root, 'deployme.jar'
+      topology_erb_cmd_string = "erb #{topology_xml_erb_file} > #{topology_xml_file}"
+      deployme_cmd_string = "$JAVA_HOME/bin/java -jar #{deployme_jar_file} -topologyFile=#{topology_xml_file} -domainName=singleDomain -serverName=singleServerName"
+      else_skip_string = 'else echo "skipping jonas_base config as already present"; fi)'
+      copyapp_cmd = "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
+
+      "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string}"
+    end
 
     def copy_resources(tomcat_home)
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
