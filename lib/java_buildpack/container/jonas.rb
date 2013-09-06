@@ -72,7 +72,7 @@ module JavaBuildpack::Container
     end
 
     def invoke_deployme
-      system(deployme_cmd())
+      system(deployme_cmd)
     end
 
     def deployme_cmd
