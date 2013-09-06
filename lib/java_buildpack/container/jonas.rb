@@ -75,13 +75,14 @@ module JavaBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
+      sed_cmd = 'sed --in-place=.orig -e "s/<Connector port=\"6666\" protocol=\"HTTP\/1.1\"/<Connector port=\"${PORT}\" protocol=\"HTTP\/1.1\"/" .jonas_base/conf/tomcat*-server.xml'
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
       export_base_vars_string     = 'export JAVA_HOME JAVA_OPTS'
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
-      "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{start_script_string}"
+      "#{sed_cmd} && #{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{start_script_string}"
     end
 
     # Deletes libs that conflicts with jonas log system Cf http://www.slf4j.org/codes.html

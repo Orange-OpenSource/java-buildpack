@@ -186,7 +186,7 @@ module JavaBuildpack::Container
           'erb .jonas_root/deployme/topology.xml.erb > .jonas_root/deployme/topology.xml && ' +
           '$JAVA_HOME/bin/java -jar .jonas_root/deployme/deployme.jar -topologyFile=.jonas_root/deployme/topology.xml -domainName=singleDomain -serverName=singleServerName && ' +
           'mkdir -p .jonas_base/deploy/app.war && cp -r --dereference * .jonas_base/deploy/app.war/; ' +
-          'else echo "skipping jonas_base config as already present"; fi) && '
+          'else echo "skipping jonas_base config as already present"; fi)'
       expect(deployme_cmd).to eq(javaenv_cmd + expected_deployme_cmd)
 
     end
