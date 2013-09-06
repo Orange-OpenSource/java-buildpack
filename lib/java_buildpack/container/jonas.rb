@@ -99,6 +99,7 @@ module JavaBuildpack::Container
     #
     # @return [String] shell command.
     def deployme_cmd
+      cd_to_app_dir = "cd #{@app_dir}"
       app_war_file = File.join JONAS_BASE, 'deploy', 'app.war'
       if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
       java_home_string = "JAVA_HOME=#{@java_home}"
@@ -115,7 +116,7 @@ module JavaBuildpack::Container
       else_skip_string = 'else echo "skipping jonas_base config as already present"; fi)'
       copyapp_cmd = "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
 
-      "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string}"
+      "#{cd_to_app_dir} && #{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string}"
     end
 
     private
