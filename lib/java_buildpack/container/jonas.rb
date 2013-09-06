@@ -94,26 +94,6 @@ module JavaBuildpack::Container
       end
     end
 
-    private
-
-    KEY_HTTP_PORT = 'http.port'.freeze
-
-    KEY_SUPPORT = 'support'.freeze
-
-    RESOURCES = File.join('..', '..', '..', 'resources', 'jonas').freeze
-
-    TOMCAT_HOME = '.tomcat'.freeze
-    JONAS_ROOT = '.jonas_root'.freeze
-    JONAS_BASE = '.jonas_base'.freeze
-
-    WEB_INF_DIRECTORY = 'WEB-INF'.freeze
-    META_INF_DIRECTORY = 'META-INF'.freeze
-    APPLICATION_XML = 'application.xml'.freeze
-
-    def invoke_deployme
-      system(deployme_cmd)
-    end
-
     # Produces the deployme command to execute to generate the jonas configuration
     #
     # @return [String] shell command.
@@ -135,6 +115,26 @@ module JavaBuildpack::Container
       copyapp_cmd = "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
 
       "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string}"
+    end
+
+    private
+
+    KEY_HTTP_PORT = 'http.port'.freeze
+
+    KEY_SUPPORT = 'support'.freeze
+
+    RESOURCES = File.join('..', '..', '..', 'resources', 'jonas').freeze
+
+    TOMCAT_HOME = '.tomcat'.freeze
+    JONAS_ROOT = '.jonas_root'.freeze
+    JONAS_BASE = '.jonas_base'.freeze
+
+    WEB_INF_DIRECTORY = 'WEB-INF'.freeze
+    META_INF_DIRECTORY = 'META-INF'.freeze
+    APPLICATION_XML = 'application.xml'.freeze
+
+    def invoke_deployme
+      system(deployme_cmd)
     end
 
     def copy_resources(tomcat_home)

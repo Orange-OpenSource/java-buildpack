@@ -201,7 +201,7 @@ module JavaBuildpack::Container
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
       containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
-      expect(command).to eq(javaenv_cmd + deployme_cmd + containerstart_cmd)
+      expect(command).to eq(javaenv_cmd + containerstart_cmd)
     end
 
     def touch(dir, name)
