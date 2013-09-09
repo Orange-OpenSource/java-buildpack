@@ -146,7 +146,7 @@ module JavaBuildpack::Container
 
 
     def invoke_deployme
-      logger = LoggerFactory.get_logger
+      logger = JavaBuildpack::Diagnostics::LoggerFactory.get_logger
       #Redirecting stdout/stderr to not pollute the release cmd captured from stdout
       logger.info('executing cmd:' + deployme_cmd)
       Open3.popen3(deployme_cmd) do |stdin, stdout, stderr, wait_thr|
