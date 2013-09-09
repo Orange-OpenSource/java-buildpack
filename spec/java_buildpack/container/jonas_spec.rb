@@ -177,7 +177,7 @@ module JavaBuildpack::Container
 
       deployme_cmd = jonas.deployme_cmd
 
-      cd_cmd = 'cd spec/fixtures/container_jonas && '
+      cd_cmd = 'cd spec/fixtures/container_jonas &&o '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
           'export JAVA_HOME JAVA_OPTS && '
 
@@ -206,7 +206,9 @@ module JavaBuildpack::Container
       sed_cmd = 'sed --in-place=.orig -e "s/<Connector port=\"6666\" protocol=\"HTTP\/1.1\"/<Connector port=\"${PORT}\" protocol=\"HTTP\/1.1\"/" .jonas_base/conf/tomcat*-server.xml && '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
-      containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
+      containerstart_cmd = 'JONAS_ROOT=.jonas_root JONAS_BASE=.jonas_base && ' +
+          'export JONAS_ROOT JONAS_BASE && ' +
+          'source .jonas_base/setenv && jonas start -fg'
       expect(command).to eq(sed_cmd + javaenv_cmd + containerstart_cmd)
     end
 
