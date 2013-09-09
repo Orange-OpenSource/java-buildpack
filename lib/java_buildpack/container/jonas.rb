@@ -20,6 +20,7 @@ require 'java_buildpack/container/container_utils'
 require 'java_buildpack/repository/configured_item'
 require 'java_buildpack/util/application_cache'
 require 'java_buildpack/util/format_duration'
+require 'open3'
 
 module JavaBuildpack::Container
 
@@ -76,7 +77,6 @@ module JavaBuildpack::Container
     def release
       #Invoke deployme cmd within release so that @java_opts gets enriched by the framework by applying heuristics
       invoke_deployme
-
       release_cmd
     end
 
@@ -150,8 +150,8 @@ module JavaBuildpack::Container
       #Redirecting stdout/stderr to not pollute the release cmd captured from stdout
       logger.info('executing cmd:' + deployme_cmd)
       Open3.popen3(deployme_cmd) do |stdin, stdout, stderr, wait_thr|
-        logger.info('deployme cmd stdout is' + stdout.read)
-        logger.info('deployme cmd stderr is' + stderr.read)
+        logger.info('deployme cmd stdout is: ' + stdout.read)
+        logger.info('deployme cmd stderr is: ' + stderr.read)
       end
     end
 
