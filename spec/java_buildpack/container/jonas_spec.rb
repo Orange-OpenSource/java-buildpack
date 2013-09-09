@@ -204,10 +204,11 @@ module JavaBuildpack::Container
       ).release
 
       sed_cmd = 'sed --in-place=.orig -e "s/<Connector port=\"6666\" protocol=\"HTTP\/1.1\"/<Connector port=\"${PORT}\" protocol=\"HTTP\/1.1\"/" .jonas_base/conf/tomcat*-server.xml && '
+      sed_cmd2 = 'sed --in-place=.orig -e "s#/tmp/staged/app/##g" .jonas_base/setenv && '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" JONAS_ROOT=.jonas_root JONAS_BASE=.jonas_base && ' +
                     'export JAVA_HOME JAVA_OPTS JONAS_ROOT JONAS_BASE && '
       containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
-      expect(command).to eq(sed_cmd + javaenv_cmd + containerstart_cmd)
+      expect(command).to eq(sed_cmd + sed_cmd2 + javaenv_cmd + containerstart_cmd)
     end
 
     def touch(dir, name)

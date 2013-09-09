@@ -26,7 +26,10 @@ Automatic removal of slf4j-jcl from war apps classpaths but not from ear apps
 
 ## Technical debt and next refactorings
 
-- too many operations are performed in the start command, altough jonas jasmine deployme command is'nt helping much with buildpack requirements (dynamic port resolution + dynamic datasource generation)
+- too many operations are performed in the start command, although jonas jasmine deployme command is'nt helping much with buildpack requirements (dynamic port resolution + dynamic datasource generation):
+  - port may vary at app instance. Jonas does not resolve it from an env var. This requires a sed cmd into release cmd
+  - deployme expects valid absolute paths into java_home. Since java_home changes from /tmp/staged/.java_home into /home/vcap/.java once the droplet during staging, this requires another sed cmd.
+  - java_opts may vary at each app memory rescale. Jonas does not resolve them from an env var. Hardcoding them into topology.xml at compile time breaks the app scale down.
 - the start cmd generation in jonas.rb could benefit from ERB templating.
 - lack unit tests on topology.xml
 

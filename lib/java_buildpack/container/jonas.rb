@@ -66,7 +66,6 @@ module JavaBuildpack::Container
       download_jonas
       download_deployme
       remove_jcl_over_slf
-      invoke_deployme
       puts 'Compile completed, release cmd to be run:'
       puts release
     end
@@ -75,7 +74,11 @@ module JavaBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
+      #Invoke deployme cmd within release so that @java_opts gets enriched by the framework by applying heuristics
+      invoke_deployme
+
       sed_cmd = 'sed --in-place=.orig -e "s/<Connector port=\"6666\" protocol=\"HTTP\/1.1\"/<Connector port=\"${PORT}\" protocol=\"HTTP\/1.1\"/" .jonas_base/conf/tomcat*-server.xml'
+      sed_cmd2 = 'sed --in-place=.orig -e "s#/tmp/staged/app/##g" .jonas_base/setenv && '
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
       jonas_envs_string = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
@@ -83,7 +86,7 @@ module JavaBuildpack::Container
       setenv_cmd_string = File.join JONAS_BASE, 'setenv'
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
-      "#{sed_cmd} && #{java_home_string} #{java_opts_string} #{jonas_envs_string} && #{export_base_vars_string} && #{start_script_string}"
+      "#{sed_cmd} && #{sed_cmd2} && #{java_home_string} #{java_opts_string} #{jonas_envs_string} && #{export_base_vars_string} && #{start_script_string}"
     end
 
     # Deletes libs that conflicts with jonas log system Cf http://www.slf4j.org/codes.html
