@@ -67,7 +67,7 @@ module JavaBuildpack::Container
       download_deployme
       remove_jcl_over_slf
       puts 'Compile completed, release cmd to be run:'
-      puts release
+      puts release_cmd
     end
 
     # Creates the command to run the Tomcat application.
@@ -77,17 +77,9 @@ module JavaBuildpack::Container
       #Invoke deployme cmd within release so that @java_opts gets enriched by the framework by applying heuristics
       invoke_deployme
 
-      sed_cmd = 'sed --in-place=.orig -e "s/<Connector port=\"6666\" protocol=\"HTTP\/1.1\"/<Connector port=\"${PORT}\" protocol=\"HTTP\/1.1\"/" .jonas_base/conf/tomcat*-server.xml'
-      sed_cmd2 = 'sed --in-place=.orig -e "s#/tmp/staged/app/##g" .jonas_base/setenv'
-      java_home_string = "JAVA_HOME=#{@java_home}"
-      java_opts_string        = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
-      jonas_envs_string = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
-      export_base_vars_string     = 'export JAVA_HOME JAVA_OPTS JONAS_ROOT JONAS_BASE'
-      setenv_cmd_string = File.join JONAS_BASE, 'setenv'
-      start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
-
-      "#{sed_cmd} && #{sed_cmd2} && #{java_home_string} #{java_opts_string} #{jonas_envs_string} && #{export_base_vars_string} && #{start_script_string}"
+      release_cmd
     end
+
 
     # Deletes libs that conflicts with jonas log system Cf http://www.slf4j.org/codes.html
     #
@@ -139,8 +131,28 @@ module JavaBuildpack::Container
     META_INF_DIRECTORY = 'META-INF'.freeze
     APPLICATION_XML = 'application.xml'.freeze
 
+    def release_cmd
+      sed_cmd = 'sed --in-place=.orig -e "s/<Connector port=\"6666\" protocol=\"HTTP\/1.1\"/<Connector port=\"${PORT}\" protocol=\"HTTP\/1.1\"/" .jonas_base/conf/tomcat*-server.xml'
+      sed_cmd2 = 'sed --in-place=.orig -e "s#/tmp/staged/app/##g" .jonas_base/setenv'
+      java_home_string = "JAVA_HOME=#{@java_home}"
+      java_opts_string = "JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\""
+      jonas_envs_string = "JONAS_ROOT=#{JONAS_ROOT} JONAS_BASE=#{JONAS_BASE}"
+      export_base_vars_string = 'export JAVA_HOME JAVA_OPTS JONAS_ROOT JONAS_BASE'
+      setenv_cmd_string = File.join JONAS_BASE, 'setenv'
+      start_script_string = "source #{setenv_cmd_string} && jonas start -fg"
+
+      "#{sed_cmd} && #{sed_cmd2} && #{java_home_string} #{java_opts_string} #{jonas_envs_string} && #{export_base_vars_string} && #{start_script_string}"
+    end
+
+
     def invoke_deployme
-      system(deployme_cmd)
+      logger = LoggerFactory.get_logger
+      #Redirecting stdout/stderr to not pollute the release cmd captured from stdout
+      logger.info('executing cmd:' + deployme_cmd)
+      Open3.popen3(deployme_cmd) do |stdin, stdout, stderr, wait_thr|
+        logger.info('deployme cmd stdout is' + stdout.read)
+        logger.info('deployme cmd stderr is' + stderr.read)
+      end
     end
 
     def copy_resources(tomcat_home)
