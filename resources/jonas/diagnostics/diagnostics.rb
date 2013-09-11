@@ -1,6 +1,5 @@
 require_relative 'gist'
 require_relative 'json'
-require 'IO'
 
 class Diagnostics
 
