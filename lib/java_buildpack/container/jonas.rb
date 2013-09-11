@@ -75,7 +75,7 @@ module JavaBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
-      diagnostic_directory = JavaBuildpack::Diagnostics.get_diagnostic_directory @app_dir
+      diagnostic_directory = JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY
       diagnostic_file = File.join diagnostic_directory, 'diagnostics.rb'
       diagnostics_cmd = "ruby #{diagnostic_file}"
       app_war_file = File.join JONAS_BASE, 'deploy' , 'app.war'
