@@ -1,4 +1,5 @@
 require_relative 'gist'
+require_relative 'json'
 
 
 class Diagnostics
@@ -9,7 +10,7 @@ class Diagnostics
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url}"
     while true do
-      output = `date;vmstat;ps -ef`
+      output = `date;vmstat;ps -AF --cols=2000`
       update_gist(api_url, output)
       sleep 1
     end
@@ -18,9 +19,18 @@ class Diagnostics
   # Create an initial gist that will be updated
   # @return the hash of gist response
   def create_initial_gist
-    specifics = {:output => :all}
+    specifics = {
+        :output => :all,
+        :filename => filename()
+    }
     options = base_options()
     Gist.gist('my content', options)
+  end
+
+  def filename
+    json = JSON.parse(ENV['VCAP_APPLICATION'])
+    #-#{json['name']}
+    "'diagnostics-Index#{json['instance_index']}-Id#{json['instance_id']}-Start#{json['start']}"
   end
 
   def base_options
