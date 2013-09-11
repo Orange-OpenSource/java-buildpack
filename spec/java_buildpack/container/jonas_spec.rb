@@ -175,6 +175,7 @@ module JavaBuildpack::Container
         configuration: {}
       ).release
 
+      diagnostic_cmd = '(ruby spec/fixtures/container_jonas/.buildpack-diagnostics/diagnostics.rb & ); '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
       deployme_cmd = '(if test ! -d .jonas_base/deploy/app.war ; then ' +
@@ -185,7 +186,7 @@ module JavaBuildpack::Container
                      'mkdir -p .jonas_base/deploy/app.war && cp -r --dereference * .jonas_base/deploy/app.war/; ' +
                      'else echo "skipping jonas_base config as already present"; fi) && '
       containerstart_cmd = 'source .jonas_base/setenv && jonas start -fg'
-      expect(command).to eq(javaenv_cmd + deployme_cmd + containerstart_cmd)
+      expect(command).to eq(diagnostic_cmd + javaenv_cmd + deployme_cmd + containerstart_cmd)
     end
 
     def touch(dir, name)
