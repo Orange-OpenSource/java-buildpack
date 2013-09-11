@@ -20,7 +20,7 @@ class Diagnostics
   end
 
   def cmd
-    ENV['DEBUG_TOGIST_CMD'] || 'date;vmstat;ps -AF --cols=2000;vmstat -s'
+    ENV['DEBUG_TOGIST_CMD'] || 'date;vmstat;ps -AFH --cols=2000;vmstat -s'
   end
 
   # Create an initial gist that will be updated
@@ -29,7 +29,8 @@ class Diagnostics
     specifics = {
     }
     options = base_options().merge specifics
-    Gist.gist('my content', options)
+    initial_content = "tracing with cmd #{cmd}"
+    Gist.gist(initial_content, options)
   end
 
   def filename
@@ -37,7 +38,7 @@ class Diagnostics
     if vcap_app
       json = JSON.parse(vcap_app)
       #-#{json['name']}
-      "'diagnostics-Index#{json['instance_index']}-Id#{json['instance_id']}-Start#{json['start']}"
+      "diagnostics-Index#{json['instance_index']}-Id#{json['instance_id']}-Start#{json['start']}"
     else
       "filename"
     end
