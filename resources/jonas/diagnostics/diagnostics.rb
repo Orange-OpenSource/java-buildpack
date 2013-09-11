@@ -33,3 +33,7 @@ class Diagnostics
   end
 
 end
+
+
+diagnostics = Diagnostics.new
+diagnostics.sample_and_post
