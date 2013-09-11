@@ -147,6 +147,9 @@ module JavaBuildpack::Container
         jonas_base = File.join root, '.jonas_base'
         expect(File.exists?(jonas_base)).to be_true
 
+        diagnostic_file = File.join root, '.buildpack-diagnostics', 'diagnostics.rb'
+        expect(File.exists?(diagnostic_file)).to be_true
+
         # Filtered out
         context = File.join jonas_root, 'repositories/maven2-internal/org/ow2/jonas/jonas-admin/5.2.4/jonas-admin-5.2.4.war'
         expect(File.exists?(context)).to be_false
