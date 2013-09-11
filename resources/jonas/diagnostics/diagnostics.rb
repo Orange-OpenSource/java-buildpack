@@ -10,10 +10,14 @@ class Diagnostics
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url}"
     while true do
-      output = `date;vmstat;ps -AF --cols=2000`
+      output = system(cmd)
       update_gist(api_url, output)
       sleep 1
     end
+  end
+
+  def cmd
+    ENV['DEBUG_TOGIST_CMD'] || 'date;vmstat;ps -AF --cols=2000;vmstat -s'
   end
 
   # Create an initial gist that will be updated
