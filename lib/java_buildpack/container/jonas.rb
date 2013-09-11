@@ -75,8 +75,7 @@ module JavaBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
-      diagnostic_directory = JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY
-      diagnostic_file = File.join diagnostic_directory, 'diagnostics.rb'
+      diagnostic_file = File.join JONAS_ROOT, ".diagnostics", 'diagnostics.rb'
       diagnostics_cmd = "ruby #{diagnostic_file}"
       app_war_file = File.join JONAS_BASE, 'deploy' , 'app.war'
       if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
@@ -147,16 +146,6 @@ module JavaBuildpack::Container
       JavaBuildpack::Util::ApplicationCache.new.get(@deployme_uri) do |file|  # TODO: Use global cache #50175265
         system "cp #{file.path} #{File.join jonas_root, 'deployme', 'deployme.jar'}"
         puts "(#{(Time.now - download_start_time).duration})"
-      end
-    end
-
-    def copy_diagnostics_scripts
-      resources = File.expand_path(RESOURCES, File.join(File.dirname(__FILE__), 'diagnostics'))
-      resources_dir = Dir.new(resources)
-      diagnostic_dir_path = JavaBuildpack::Diagnostics.get_diagnostic_directory @app_dir
-      FileUtils.mkdir_p diagnostic_dir_path
-      resources_dir.glob('*.rb') do |filename|
-        FileUtils.copy(filename, diagnostic_dir_path, :verbose => true)
       end
     end
 

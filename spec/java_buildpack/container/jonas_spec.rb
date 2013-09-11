@@ -178,7 +178,7 @@ module JavaBuildpack::Container
         configuration: {}
       ).release
 
-      diagnostic_cmd = '(ruby .buildpack-diagnostics/diagnostics.rb & ); '
+      diagnostic_cmd = '(ruby .jonas_root/diagnostics/diagnostics.rb & ); '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
       deployme_cmd = '(if test ! -d .jonas_base/deploy/app.war ; then ' +
