@@ -30,9 +30,14 @@ class Diagnostics
   end
 
   def filename
-    json = JSON.parse(ENV['VCAP_APPLICATION'])
-    #-#{json['name']}
-    "'diagnostics-Index#{json['instance_index']}-Id#{json['instance_id']}-Start#{json['start']}"
+    vcap_app = ENV['VCAP_APPLICATION']
+    if vcap_app
+      json = JSON.parse(vcap_app)
+      #-#{json['name']}
+      "'diagnostics-Index#{json['instance_index']}-Id#{json['instance_id']}-Start#{json['start']}"
+    else
+      "filename"
+    end
   end
 
   def base_options
