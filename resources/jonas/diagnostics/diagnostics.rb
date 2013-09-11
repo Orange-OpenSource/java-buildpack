@@ -9,7 +9,7 @@ class Diagnostics
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url}"
     while true do
-      output = `vmstat;ps -ef`
+      output = `date;vmstat;ps -ef`
       update_gist(api_url, output)
       sleep 1
     end

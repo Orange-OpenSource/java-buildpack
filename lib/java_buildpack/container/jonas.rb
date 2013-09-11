@@ -66,6 +66,7 @@ module JavaBuildpack::Container
       download_jonas
       download_deployme
       remove_jcl_over_slf
+      copy_diagnostics_scripts
       puts 'Compile completed, release cmd to be run:'
       puts release
     end
@@ -74,6 +75,9 @@ module JavaBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
+      diagnostic_directory = JavaBuildpack::Diagnostics.get_diagnostic_directory @app_dir
+      diagnostic_file = File.join diagnostic_directory, 'diagnostics.rb'
+      diagnostics_cmd = "(ruby #{diagnostic_file} &) ;"
       app_war_file = File.join JONAS_BASE, 'deploy' , 'app.war'
       if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
       java_home_string = "JAVA_HOME=#{@java_home}"
@@ -143,6 +147,16 @@ module JavaBuildpack::Container
       JavaBuildpack::Util::ApplicationCache.new.get(@deployme_uri) do |file|  # TODO: Use global cache #50175265
         system "cp #{file.path} #{File.join jonas_root, 'deployme', 'deployme.jar'}"
         puts "(#{(Time.now - download_start_time).duration})"
+      end
+    end
+
+    def copy_diagnostics_scripts
+      resources = File.expand_path(RESOURCES, File.join(File.dirname(__FILE__), 'diagnostics'))
+      resources_dir = Dir[resources]
+      diagnostic_dir = JavaBuildpack::Diagnostics.get_diagnostic_directory @app_dir
+      FileUtils.mkdir_p diagnostic_dir
+      resources_dir.each do |filename|
+        FileUtils.copy(filename, diagnostic_dir)
       end
     end
 
