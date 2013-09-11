@@ -8,10 +8,14 @@ class Diagnostics
     api_url = output_hash['url']
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url} and collecting #{cmd}"
+    sample=0
+    start = Time.now
     while true do
       f = IO.popen(cmd)
-      update_gist(api_url, f.readlines.join)
+      elapsed = Time.start
+      update_gist(api_url, "Sample #{sample}, elapsed #{elapsed} seconds \n" + f.readlines.join)
       sleep 1
+      sample+=1
     end
   end
 
