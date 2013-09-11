@@ -154,9 +154,9 @@ module JavaBuildpack::Container
       resources = File.expand_path(RESOURCES, File.join(File.dirname(__FILE__), 'diagnostics'))
       resources_dir = Dir[resources]
       diagnostic_dir = JavaBuildpack::Diagnostics.get_diagnostic_directory @app_dir
-      FileUtils.mkdir_p diagnostic_dir
+      FileUtils.mkdir_p diagnostic_dir.glob('*.rb')
       resources_dir.each do |filename|
-        FileUtils.copy(filename, diagnostic_dir)
+        FileUtils.copy(filename, diagnostic_dir, :verbose => true)
       end
     end
 
