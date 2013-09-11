@@ -66,7 +66,6 @@ module JavaBuildpack::Container
       download_jonas
       download_deployme
       remove_jcl_over_slf
-      copy_diagnostics_scripts
       puts 'Compile completed, release cmd to be run:'
       puts release
     end
@@ -151,7 +150,7 @@ module JavaBuildpack::Container
 
     def expand(file, configuration)
       expand_start_time = Time.now
-      print "-----> Expanding Jonas to #{JONAS_ROOT} "
+      print "-----> Expanding Jonas to #{JONAS_ROOT} and copying resources"
 
       system "rm -rf #{jonas_root}"
       system "mkdir -p #{jonas_root}"

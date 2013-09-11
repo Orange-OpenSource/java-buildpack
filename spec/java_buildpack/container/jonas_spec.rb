@@ -147,7 +147,7 @@ module JavaBuildpack::Container
         jonas_base = File.join root, '.jonas_base'
         expect(File.exists?(jonas_base)).to be_true
 
-        diagnostic_file = File.join root, '.buildpack-diagnostics', 'diagnostics.rb'
+        diagnostic_file = File.join root, '.jonas_root', 'diagnostics', 'diagnostics.rb'
         expect(File.exists?(diagnostic_file)).to be_true
 
         # Filtered out
