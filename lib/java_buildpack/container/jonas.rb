@@ -77,7 +77,7 @@ module JavaBuildpack::Container
     def release
       diagnostic_directory = JavaBuildpack::Diagnostics.get_diagnostic_directory @app_dir
       diagnostic_file = File.join diagnostic_directory, 'diagnostics.rb'
-      diagnostics_cmd = "(ruby #{diagnostic_file} &) ;"
+      diagnostics_cmd = "ruby #{diagnostic_file}"
       app_war_file = File.join JONAS_BASE, 'deploy' , 'app.war'
       if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
       java_home_string = "JAVA_HOME=#{@java_home}"
@@ -96,7 +96,7 @@ module JavaBuildpack::Container
       copyapp_cmd =   "mkdir -p #{app_war_file} && cp -r --dereference * #{app_war_file}/"
       start_script_string     = "source #{setenv_cmd_string} && jonas start -fg"
 
-      "#{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string} && #{start_script_string}"
+      "(#{diagnostics_cmd} & ); #{java_home_string} #{java_opts_string} && #{export_base_vars_string} && #{if_jonas_base_exists_string} #{deployme_var_string} && #{export_deployme_vars_string} && #{topology_erb_cmd_string} && #{deployme_cmd_string} && #{copyapp_cmd}; #{else_skip_string} && #{start_script_string}"
     end
 
     # Deletes libs that conflicts with jonas log system Cf http://www.slf4j.org/codes.html
