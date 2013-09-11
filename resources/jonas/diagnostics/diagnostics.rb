@@ -10,7 +10,7 @@ class Diagnostics
     puts "gist will be accessible through #{html_url} and collecting #{cmd}"
     while true do
       f = IO.popen(cmd)
-      update_gist(api_url, f.readlines.to_s)
+      update_gist(api_url, f.readlines.join)
       sleep 1
     end
   end
