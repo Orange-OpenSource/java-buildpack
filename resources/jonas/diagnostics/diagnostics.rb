@@ -12,7 +12,7 @@ class Diagnostics
     start = Time.now
     while true do
       f = IO.popen(cmd)
-      elapsed = Time.start
+      elapsed = Time.now - start
       update_gist(api_url, "Sample #{sample}, elapsed #{elapsed} seconds \n" + f.readlines.join)
       sleep 1
       sample+=1
