@@ -1,6 +1,6 @@
 require_relative 'gist'
 require_relative 'json'
-
+require 'IO'
 
 class Diagnostics
 
@@ -10,9 +10,8 @@ class Diagnostics
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url} and collecting #{cmd}"
     while true do
-      Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-        update_gist(api_url, stderr.read + stdout.read)
-      end
+      f = IO.popen(cmd)
+      update_gist(api_url, f.readlines.to_s)
       sleep 1
     end
   end
