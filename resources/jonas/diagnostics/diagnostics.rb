@@ -20,10 +20,9 @@ class Diagnostics
   # @return the hash of gist response
   def create_initial_gist
     specifics = {
-        :output => :all,
         :filename => filename()
     }
-    options = base_options()
+    options = base_options().merge specifics
     Gist.gist('my content', options)
   end
 
