@@ -10,8 +10,9 @@ class Diagnostics
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url}"
     while true do
-      output = system(cmd)
-      update_gist(api_url, output)
+      Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+        update_gist(stderr.read + stdout.read, output)
+      end
       sleep 1
     end
   end
