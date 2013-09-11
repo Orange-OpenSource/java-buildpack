@@ -11,7 +11,7 @@ class Diagnostics
     puts "gist will be accessible through #{html_url}"
     while true do
       Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-        update_gist(stderr.read + stdout.read, output)
+        update_gist(api_url, stderr.read + stdout.read)
       end
       sleep 1
     end
