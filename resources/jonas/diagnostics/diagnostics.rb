@@ -4,25 +4,28 @@ require_relative 'gist'
 class Diagnostics
 
   def sample_and_post
-    gist_url = create_initial_gist
-    puts "gist will be accessible through #{gist_url}"
+    output_hash = create_initial_gist
+    api_url = output_hash['url']
+    html_url = output_hash['html_url']
+    puts "gist will be accessible through #{html_url}"
     while true do
       output = `vmstat;ps -ef`
-      update_gist(gist_url, output)
+      update_gist(api_url, output)
       sleep 1
     end
   end
 
   # Create an initial gist that will be updated
-  # @return the url or id of a gist to update
+  # @return the hash of gist response
   def create_initial_gist
+    specifics = {:output => :all}
     options = base_options()
     Gist.gist('my content', options)
   end
 
   def base_options
     {:access_token => ENV['DEBUG_TOGIST_TOKEN'],
-     :public => false,
+     :private => true,
     }
   end
 
