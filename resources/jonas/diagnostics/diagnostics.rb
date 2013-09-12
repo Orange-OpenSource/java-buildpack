@@ -29,7 +29,7 @@ class Diagnostics
   end
 
   def cmd
-    ENV['DEBUG_TOGIST_CMD'] || 'date;vmstat;ps -AFH --cols=2000;free;vmstat -s'
+    ENV['DEBUG_TOGIST_CMD'] || 'date;vmstat;ps -AFH --cols=2000;free'
   end
 
   # Create an initial gist that will be updated
