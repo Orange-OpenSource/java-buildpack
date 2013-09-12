@@ -8,12 +8,13 @@ class Diagnostics
     api_url = output_hash['url']
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url} and collecting #{cmd}"
+    initial_cmd = 'cgget -r cpuset.cpus -r memory.limit_in_bytes; free'
+    puts "#{initial_cmd} returns #{execute_cmd(initial_cmd)}"
+
     sample=0
     start = Time.now
     while true do
-      f = IO.popen(cmd)
-      cmd_output = f.readlines
-      f.close
+      cmd_output = execute_cmd(cmd)
 
       elapsed = Time.now - start
       update_gist(api_url, "Sample #{sample}, elapsed #{elapsed} seconds \n" + cmd_output.join)
@@ -22,8 +23,15 @@ class Diagnostics
     end
   end
 
+  def execute_cmd(cmd_string)
+    f = IO.popen(cmd_string)
+    cmd_output = f.readlines
+    f.close
+    cmd_output
+  end
+
   def cmd
-    ENV['DEBUG_TOGIST_CMD'] || 'date;vmstat;ps -AFH --cols=2000;vmstat -s'
+    ENV['DEBUG_TOGIST_CMD'] || 'date;vmstat;ps -AFH --cols=2000;free;vmstat -s'
   end
 
   # Create an initial gist that will be updated
