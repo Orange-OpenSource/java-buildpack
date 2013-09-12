@@ -8,8 +8,6 @@ class Diagnostics
     api_url = output_hash['url']
     html_url = output_hash['html_url']
     puts "gist will be accessible through #{html_url} and collecting #{cmd}"
-    initial_cmd = 'cgget -r cpuset.cpus -r memory.limit_in_bytes; free'
-    puts "#{initial_cmd} returns \n#{execute_cmd(initial_cmd)}"
 
     sample=0
     start = Time.now
@@ -39,8 +37,10 @@ class Diagnostics
   def create_initial_gist
     specifics = {
     }
+    initial_cmd = 'cgget -r cpuset.cpus -r memory.limit_in_bytes; free'
+    initial_content = "tracing with cmd #{cmd} \nAlso #{initial_cmd} returns:\n#{execute_cmd(initial_cmd)}"
+
     options = base_options().merge specifics
-    initial_content = "tracing with cmd #{cmd}"
     Gist.gist(initial_content, options)
   end
 
