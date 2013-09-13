@@ -80,4 +80,4 @@ end
 
 
 diagnostics = Diagnostics.new
-diagnostics.sample_and_post
+diagnostics.main
