@@ -3,6 +3,14 @@ require_relative 'json'
 
 class Diagnostics
 
+  def main
+    if ENV['DEBUG_TOGIST']
+      sample_and_post
+    else
+      puts 'Diagnostics disabled'
+    end
+  end
+
   def sample_and_post
     output_hash = create_initial_gist
     api_url = output_hash['url']
