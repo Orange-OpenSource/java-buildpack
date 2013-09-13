@@ -30,7 +30,8 @@ class Diagnostics
   end
 
   def execute_cmd(cmd_string)
-    f = IO.popen(cmd_string, :err=>[:child, :out])
+    Kernel.spawn
+    f = IO.popen(cmd_string, {:err=>[:child, :out]})
     cmd_output = f.readlines
     f.close
     cmd_output.join
