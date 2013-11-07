@@ -24,12 +24,12 @@ module JavaBuildpack
 
   describe Buildpack do
 
-    let(:stub_container1) { double('StubContainer1', detect: nil) }
-    let(:stub_container2) { double('StubContainer2', detect: nil) }
+    let(:stub_container1) { double('StubContainer1', detect: nil, component_name: 'StubContainer1') }
+    let(:stub_container2) { double('StubContainer2', detect: nil, component_name: 'StubContainer2') }
     let(:stub_framework1) { double('StubFramework1', detect: nil) }
     let(:stub_framework2) { double('StubFramework2', detect: nil) }
-    let(:stub_jre1) { double('StubJre1', detect: nil) }
-    let(:stub_jre2) { double('StubJre2', detect: nil) }
+    let(:stub_jre1) { double('StubJre1', detect: nil, component_name: 'StubJre1') }
+    let(:stub_jre2) { double('StubJre2', detect: nil, component_name: 'StubJre2') }
 
     before do
       YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
@@ -50,14 +50,19 @@ module JavaBuildpack
       Test::StubJre1.stub(:new).and_return(stub_jre1)
       Test::StubJre2.stub(:new).and_return(stub_jre2)
 
+      JavaBuildpack::Diagnostics::LoggerFactory.send :close
       $stderr = StringIO.new
+      tmpdir = Dir.tmpdir
+      diagnostics_directory = File.join(tmpdir, JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
+      FileUtils.rm_rf diagnostics_directory
+      JavaBuildpack::Diagnostics::LoggerFactory.create_logger tmpdir
     end
 
     it 'should raise an error if more than one container can run an application' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_container2.stub(:detect).and_return('stub-container-2')
 
-      with_buildpack { |buildpack| expect { buildpack.detect }.to raise_error(/stub-container-1, stub-container-2/) }
+      with_buildpack { |buildpack| expect { buildpack.detect }.to raise_error(/Application can be run by more than one container: StubContainer1, StubContainer2/) }
     end
 
     it 'should return no detections if no container can run an application' do
@@ -65,19 +70,52 @@ module JavaBuildpack
       expect(detected).to be_empty
     end
 
+    it 'should raise an error on compile if more than one container can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_container2.stub(:detect).and_return('stub-container-2')
+
+      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/Application can be run by more than one container: StubContainer1, StubContainer2/) }
+    end
+
     it 'should raise an error on compile if no container can run an application' do
-      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/No supported application type/) }
+      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/No container can run the application/) }
     end
 
     it 'should raise an error on release if no container can run an application' do
-      with_buildpack { |buildpack| expect { buildpack.release }.to raise_error(/No supported application type/) }
+      with_buildpack { |buildpack| expect { buildpack.release }.to raise_error(/No container can run the application/) }
     end
 
     it 'should raise an error if more than one JRE can run an application' do
       stub_jre1.stub(:detect).and_return('stub-jre-1')
       stub_jre2.stub(:detect).and_return('stub-jre-2')
 
-      with_buildpack { |buildpack| expect { buildpack.detect }.to raise_error(/stub-jre-1, stub-jre-2/) }
+      with_buildpack { |buildpack| expect { buildpack.detect }.to raise_error(/Application can be run by more than one JRE: StubJre1, StubJre2/) }
+    end
+
+    it 'should raise an error on compile if more than one JRE can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_jre1.stub(:detect).and_return('stub-jre-1')
+      stub_jre2.stub(:detect).and_return('stub-jre-2')
+
+      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/Application can be run by more than one JRE: StubJre1, StubJre2/) }
+    end
+
+    it 'should raise an error on release if more than one JRE can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_jre1.stub(:detect).and_return('stub-jre-1')
+      stub_jre2.stub(:detect).and_return('stub-jre-2')
+
+      with_buildpack { |buildpack| expect { buildpack.release }.to raise_error(/Application can be run by more than one JRE: StubJre1, StubJre2/) }
+    end
+
+    it 'should raise an error on compile if no JRE can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      with_buildpack { |buildpack| expect { buildpack.compile }.to raise_error(/No JRE can run the application/) }
+    end
+
+    it 'should raise an error on release if no JRE can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      with_buildpack { |buildpack| expect { buildpack.release }.to raise_error(/No JRE can run the application/) }
     end
 
     it 'should call compile on matched components' do
@@ -93,6 +131,13 @@ module JavaBuildpack
       stub_jre2.should_not_receive(:compile)
 
       with_buildpack { |buildpack| buildpack.compile }
+    end
+
+    it 'should raise an error on release if more than one container can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_container2.stub(:detect).and_return('stub-container-2')
+
+      with_buildpack { |buildpack| expect { buildpack.release }.to raise_error(/Application can be run by more than one container: StubContainer1, StubContainer2/) }
     end
 
     it 'should call release on matched components' do
@@ -143,7 +188,7 @@ module JavaBuildpack
     end
 
     it 'handles exceptions correctly' do
-      expect { with_buildpack { |buildpack| raise 'an exception' } }.to raise_error SystemExit
+      expect { with_buildpack { |buildpack| fail 'an exception' } }.to raise_error SystemExit
       expect($stderr.string).to match(/an exception/)
     end
 

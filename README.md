@@ -25,22 +25,23 @@ The buildpack supports configuration and extension through the use of Git reposi
 	* [Tomcat](docs/container-tomcat.md) ([Configuration](docs/container-tomcat.md#configuration))
 * Standard Frameworks
 	* [`JAVA_OPTS`](docs/framework-java_opts.md) ([Configuration](docs/framework-java_opts.md#configuration))
+	* [AppDynamics](docs/framework-app-dynamics.md) ([Configuration](docs/framework-app-dynamics.md#configuration))
 	* [New Relic](docs/framework-new-relic.md) ([Configuration](docs/framework-new-relic.md#configuration))
 	* [Play Auto Reconfiguration](docs/framework-play-auto-reconfiguration.md) ([Configuration](docs/framework-play-auto-reconfiguration.md#configuration))
 	* [Play JPA Plugin](docs/framework-play-jpa-plugin.md) ([Configuration](docs/framework-play-jpa-plugin.md#configuration))
 	* [Spring Auto Reconfiguration](docs/framework-spring-auto-reconfiguration.md) ([Configuration](docs/framework-spring-auto-reconfiguration.md#configuration))
+	* [Spring Insight](docs/framework-spring-insight.md) ([Configuration](docs/framework-spring-insight.md#configuration))
 * Standard JREs
 	* [OpenJDK](docs/jre-openjdk.md) ([Configuration](docs/jre-openjdk.md#configuration))
-* Extending
-	* [Containers](docs/extending-containers.md)
-	* [JREs](docs/extending-jres.md)
-	* [Frameworks](docs/extending-frameworks.md)
+* [Extending](docs/extending.md)
 * Utilities
-	* [Caches](docs/util-caches.md)
-	* [Logging](docs/logging.md)
+	* [Caches](docs/util-caches.md) ([Configuration](docs/util-caches.md#configuration))
+	* [Logging](docs/logging.md) ([Configuration](docs/logging.md#configuration))
 	* [Repositories](docs/util-repositories.md)
+	* [Other Utiltities](docs/util-other.md)
 	* [Repository Builder](docs/util-repository-builder.md)
 	* [Test Applications](docs/util-test-applications.md)
+	* [System Tests](docs/util-system-tests.md)
 
 ## Running Tests
 To run the tests, do the following:
@@ -50,7 +51,13 @@ bundle install
 bundle exec rake
 ```
 
-If you want to use the RubyMine debugger, you may need to [install additional gems][].
+If you want to use the RubyMine debugger, you may need to [install additional gems][] by issuing:
+
+```bash
+bundle install --gemfile Gemfile.rubymine-debug
+```
+
+[Installing Cloud Foundry on Vagrant][] is useful for privately testing new features.
 
 ## Contributing
 [Pull requests][] are welcome; see the [contributor guidelines][] for details.
@@ -65,3 +72,4 @@ The Tomcat Builder is released under version 2.0 of the [Apache License][].
 [install additional gems]: http://stackoverflow.com/questions/11732715/how-do-i-install-ruby-debug-base19x-on-mountain-lion-for-intellij
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
+[Installing Cloud Foundry on Vagrant]: http://blog.cloudfoundry.com/2013/06/27/installing-cloud-foundry-on-vagrant/

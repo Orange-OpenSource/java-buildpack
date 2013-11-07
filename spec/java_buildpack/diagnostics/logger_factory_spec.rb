@@ -24,7 +24,12 @@ module JavaBuildpack::Diagnostics
     LOG_MESSAGE = 'a log message'
 
     before do
+      JavaBuildpack::Diagnostics::LoggerFactory.send :close
       $stderr = StringIO.new
+      tmpdir = Dir.tmpdir
+      diagnostics_directory = File.join(tmpdir, JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
+      FileUtils.rm_rf diagnostics_directory
+      JavaBuildpack::Diagnostics::LoggerFactory.create_logger tmpdir
     end
 
     it 'should create a logger' do
@@ -146,10 +151,15 @@ module JavaBuildpack::Diagnostics
     it 'should take the default log level from a YAML file' do
       YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
           'default_log_level' => 'DEBUG')
-      Dir.mktmpdir do |app_dir|
-        logger = new_logger app_dir
-        logger.debug(LOG_MESSAGE)
-        expect($stderr.string).to match(/#{LOG_MESSAGE}/)
+      begin
+        Dir.mktmpdir do |app_dir|
+          logger = new_logger app_dir
+          logger.debug(LOG_MESSAGE)
+          expect($stderr.string).to match(/#{LOG_MESSAGE}/)
+        end
+      ensure
+        YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
+            'default_log_level' => 'INFO')
       end
     end
 
@@ -219,6 +229,28 @@ module JavaBuildpack::Diagnostics
           file_contents = File.read File.join(JavaBuildpack::Diagnostics.get_diagnostic_directory(app_dir), JavaBuildpack::Diagnostics::LOG_FILE_NAME)
           expect(file_contents).to match(/#{LOG_MESSAGE}/)
         end
+      end
+    end
+
+    it 'should issue warnings if the logger is re-created' do
+      Dir.mktmpdir do |app_dir|
+        with_log_level('WARN') do
+          new_logger app_dir
+          LoggerFactory.create_logger app_dir
+          expect($stderr.string).to match(/Logger is being re-created/)
+          expect($stderr.string).to match(/Logger was re-created by/)
+        end
+      end
+    end
+
+    it 'should fail if a non-existent logger is requested' do
+      JavaBuildpack::Diagnostics::LoggerFactory.send :close
+      previous_standard_error, STDERR = STDERR, StringIO.new
+      begin
+        expect { LoggerFactory.get_logger }.to raise_error(/no logger/)
+        expect(STDERR.string).to match(/Attempt to get nil logger from: /)
+      ensure
+        STDERR = previous_standard_error
       end
     end
 

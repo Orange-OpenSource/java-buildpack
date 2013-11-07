@@ -36,17 +36,17 @@ module JavaBuildpack::Framework
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(PLAY_AUTO_RECONFIGURATION_DETAILS)
 
       detected = PlayAutoReconfiguration.new(
-        app_dir: 'spec/fixtures/container_play',
-        configuration: {}
+          app_dir: 'spec/fixtures/container_play_2.1_dist',
+          configuration: {}
       ).detect
 
-      expect(detected).to eq('play-auto-reconfiguration-0.6.8')
+      expect(detected).to eq('play-auto-reconfiguration=0.6.8')
     end
 
     it 'should not detect without application configuration' do
       detected = PlayAutoReconfiguration.new(
-        app_dir: 'spec/fixtures/container_play_too_deep',
-        configuration: {}
+          app_dir: 'spec/fixtures/container_play_too_deep',
+          configuration: {}
       ).detect
 
       expect(detected).to be_nil
@@ -62,9 +62,9 @@ module JavaBuildpack::Framework
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
 
         PlayAutoReconfiguration.new(
-          app_dir: 'spec/fixtures/container_play',
-          lib_directory: lib_directory,
-          configuration: {}
+            app_dir: 'spec/fixtures/container_play_2.1_dist',
+            lib_directory: lib_directory,
+            configuration: {}
         ).compile
 
         expect(File.exists? File.join(lib_directory, 'play-auto-reconfiguration-0.6.8.jar')).to be_true

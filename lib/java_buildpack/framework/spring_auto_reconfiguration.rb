@@ -17,97 +17,62 @@
 require 'java_buildpack/diagnostics/logger_factory'
 require 'java_buildpack/framework'
 require 'java_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
-require 'java_buildpack/repository/configured_item'
-require 'java_buildpack/util/application_cache'
-require 'java_buildpack/util/download'
-require 'java_buildpack/util/format_duration'
+require 'java_buildpack/versioned_dependency_component'
 
 module JavaBuildpack::Framework
 
   # Encapsulates the detect, compile, and release functionality for enabling cloud auto-reconfiguration in Spring
   # applications.
-  class SpringAutoReconfiguration
+  class SpringAutoReconfiguration < JavaBuildpack::VersionedDependencyComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [String] :app_dir the directory that the application exists in
-    # @option context [String] :lib_directory the directory that additional libraries are placed in
-    # @option context [Hash] :configuration the properties provided by the user
-    def initialize(context = {})
+    def initialize(context)
+      super('Spring Auto-reconfiguration', context)
       @logger = JavaBuildpack::Diagnostics::LoggerFactory.get_logger
-      @app_dir = context[:app_dir]
-      @lib_directory = context[:lib_directory]
-      @configuration = context[:configuration]
-      @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration)
     end
 
-    # Detects whether this application is suitable for auto-reconfiguration
-    #
-    # @return [String] returns +spring-auto-reconfiguration-<version>+ if the application is a candidate for
-    #                  auto-reconfiguration otherwise returns +nil+
-    def detect
-      @auto_reconfiguration_version ? id(@auto_reconfiguration_version) : nil
-    end
-
-    # Downloads the Auto-reconfiguration JAR
-    #
-    # @return [void]
     def compile
-      JavaBuildpack::Util.download(@auto_reconfiguration_version, @auto_reconfiguration_uri, 'Auto Reconfiguration', jar_name(@auto_reconfiguration_version), @lib_directory)
+      download_jar jar_name
       modify_web_xml
     end
 
-    # Does nothing
-    #
-    # @return [void]
     def release
+    end
+
+    protected
+
+    def supports?
+      Dir["#{@app_dir}/**/#{SPRING_JAR_PATTERN}"].any?
     end
 
     private
 
-      SPRING_JAR_PATTERN = 'spring-core*.jar'
+    SPRING_JAR_PATTERN = '*spring-core*.jar'.freeze
 
-      WEB_XML = File.join 'WEB-INF', 'web.xml'
+    WEB_XML = File.join 'WEB-INF', 'web.xml'.freeze
 
-      def self.find_auto_reconfiguration(app_dir, configuration)
-        if spring_application? app_dir
-          version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration)
-        else
-          version = nil
-          uri = nil
+    def jar_name
+      "#{@parsable_component_name}-#{@version}.jar"
+    end
+
+    def modify_web_xml
+      web_xml = File.join @app_dir, WEB_XML
+
+      if File.exists? web_xml
+        puts '       Modifying /WEB-INF/web.xml for Auto Reconfiguration'
+        @logger.debug { "  Original web.xml: #{File.read web_xml}" }
+
+        modifier = File.open(web_xml) { |file| WebXmlModifier.new(file) }
+        modifier.augment_root_context
+        modifier.augment_servlet_contexts
+
+        File.open(web_xml, 'w') do |file|
+          file.write(modifier.to_s)
+          file.fsync
         end
 
-        return version, uri # rubocop:disable RedundantReturn
+        @logger.debug { "  Modified web.xml: #{File.read web_xml}" }
       end
-
-      def id(version)
-        "spring-auto-reconfiguration-#{version}"
-      end
-
-      def jar_name(version)
-        "#{id version}.jar"
-      end
-
-      def modify_web_xml
-        web_xml = File.join @app_dir, WEB_XML
-
-        if File.exists? web_xml
-          puts '       Modifying /WEB-INF/web.xml for Auto Reconfiguration'
-          @logger.debug { "  Original web.xml: #{File.read web_xml}" }
-
-          modifier = File.open(web_xml) { |file| WebXmlModifier.new(file) }
-          modifier.augment_root_context
-          modifier.augment_servlet_contexts
-
-          File.open(web_xml, 'w') { |file| file.write(modifier.to_s) }
-          @logger.debug { "  Modified web.xml: #{File.read web_xml}" }
-        end
-      end
-
-      def self.spring_application?(app_dir)
-        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any?
-      end
+    end
 
   end
 

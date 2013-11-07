@@ -44,7 +44,7 @@ module JavaBuildpack::Jre
             configuration: {}
         ).detect
 
-        expect(detected).to eq('openjdk-1.7.0')
+        expect(detected).to eq('openjdk=1.7.0')
       end
     end
 
@@ -82,24 +82,10 @@ module JavaBuildpack::Jre
       end
     end
 
-    it 'should fail when ConfiguredItem.find_item fails' do
-      Dir.mktmpdir do |root|
-        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
-        expect do
-          OpenJdk.new(
-              app_dir: '',
-              java_home: '',
-              java_opts: [],
-              configuration: {}
-          ).detect
-        end.to raise_error(/OpenJDK\ JRE\ error:\ test\ error/)
-      end
-    end
-
     it 'should add memory options to java_opts' do
       Dir.mktmpdir do |root|
         JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        MemoryHeuristicsOpenJDKPre8.stub(:new).and_return(memory_heuristic)
+        WeightBalancingMemoryHeuristic.stub(:new).and_return(memory_heuristic)
 
         java_opts = []
         OpenJdk.new(

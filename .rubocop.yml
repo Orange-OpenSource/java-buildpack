@@ -2,7 +2,15 @@
 AllCops:
   Excludes:
     - vendor/**
+ClassLength:
+  Max: 200
+ClassVars:
+  Enabled: false
+CyclomaticComplexity:
+  Max: 10
 Documentation:
+  Enabled: false
+EmptyLinesAroundBody:
   Enabled: false
 LineLength:
   Enabled: false
@@ -10,5 +18,3 @@ MethodLength:
   Max: 25
 ParameterLists:
   Max: 6
-AvoidClassVars:
-  Enabled: false

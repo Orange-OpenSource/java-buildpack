@@ -62,7 +62,7 @@ module JavaBuildpack::Container
           configuration: {}
       ).detect
 
-      expect(detected).to include('groovy-2.1.5')
+      expect(detected).to include('groovy=2.1.5')
     end
 
     it 'should detect a Groovy file with non-POGO' do
@@ -73,7 +73,7 @@ module JavaBuildpack::Container
           configuration: {}
       ).detect
 
-      expect(detected).to include('groovy-2.1.5')
+      expect(detected).to include('groovy=2.1.5')
     end
 
     it 'should detect a Groovy file with #!' do
@@ -84,7 +84,7 @@ module JavaBuildpack::Container
           configuration: {}
       ).detect
 
-      expect(detected).to include('groovy-2.1.5')
+      expect(detected).to include('groovy=2.1.5')
     end
 
     it 'should fail when a malformed version is detected' do
@@ -95,12 +95,12 @@ module JavaBuildpack::Container
             app_dir: 'spec/fixtures/container_groovy_main_method',
             configuration: {}
         ).detect
-      end.to raise_error(/Malformed\ Groovy\ version/)
+      end.to raise_error(/Malformed\ version/)
     end
 
     it 'should extract Groovy from a ZIP' do
       Dir.mktmpdir do |root|
-        Dir['spec/fixtures/container_groovy_main_method/*'].each { |file| system "cp #{file} #{root}" }
+        Dir['spec/fixtures/container_groovy_main_method/*'].each { |file| system "cp -r #{file} #{root}" }
 
         JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(GROOVY_VERSION) if block }
         .and_return(GROOVY_DETAILS)
@@ -124,7 +124,7 @@ module JavaBuildpack::Container
         Dir.mkdir lib_directory
 
         Dir['spec/fixtures/additional_libs/*'].each { |file| system "cp #{file} #{lib_directory}" }
-        Dir['spec/fixtures/container_groovy_main_method/*'].each { |file| system "cp #{file} #{root}" }
+        Dir['spec/fixtures/container_groovy_main_method/*'].each { |file| system "cp -r #{file} #{root}" }
 
         JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(GROOVY_VERSION) if block }
         .and_return(GROOVY_DETAILS)
@@ -137,7 +137,7 @@ module JavaBuildpack::Container
             configuration: {}
         ).release
 
-        expect(command).to eq('JAVA_HOME=test-java-home JAVA_OPTS="test-opt-1 test-opt-2" .groovy/bin/groovy -cp .lib/test-jar-1.jar:.lib/test-jar-2.jar Application.groovy Alpha.groovy')
+        expect(command).to eq('JAVA_HOME=test-java-home JAVA_OPTS="test-opt-1 test-opt-2" .groovy/bin/groovy -cp .lib/test-jar-1.jar:.lib/test-jar-2.jar Application.groovy Alpha.groovy directory/Beta.groovy')
       end
     end
 

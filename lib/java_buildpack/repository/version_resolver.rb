@@ -40,30 +40,30 @@ module JavaBuildpack::Repository
       .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
       .max { |a, b| a <=> b }
 
-      raise "No version resolvable for '#{candidate_version}' in #{versions.join(', ')}" if version.nil?
+      fail "No version resolvable for '#{candidate_version}' in #{versions.join(', ')}" if version.nil?
       version
     end
 
     private
 
-      TOKENIZED_WILDCARD = JavaBuildpack::Util::TokenizedVersion.new('+')
+    TOKENIZED_WILDCARD = JavaBuildpack::Util::TokenizedVersion.new('+')
 
-      def self.safe_candidate_version(candidate_version)
-        if candidate_version.nil?
-          TOKENIZED_WILDCARD
-        else
-          raise "Invalid TokenizedVersion '#{candidate_version}'" unless candidate_version.is_a?(JavaBuildpack::Util::TokenizedVersion)
-          candidate_version
-        end
+    def self.safe_candidate_version(candidate_version)
+      if candidate_version.nil?
+        TOKENIZED_WILDCARD
+      else
+        fail "Invalid TokenizedVersion '#{candidate_version}'" unless candidate_version.is_a?(JavaBuildpack::Util::TokenizedVersion)
+        candidate_version
       end
+    end
 
-      def self.matches?(tokenized_candidate_version, tokenized_version)
-        (0..3).all? do |i|
-          tokenized_candidate_version[i].nil? ||
+    def self.matches?(tokenized_candidate_version, tokenized_version)
+      (0..3).all? do |i|
+        tokenized_candidate_version[i].nil? ||
             tokenized_candidate_version[i] == JavaBuildpack::Util::TokenizedVersion::WILDCARD ||
             tokenized_candidate_version[i] == tokenized_version[i]
-        end
       end
+    end
 
   end
 

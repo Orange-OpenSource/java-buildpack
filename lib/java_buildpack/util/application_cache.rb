@@ -14,8 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'time'
 require 'java_buildpack/util'
 require 'java_buildpack/util/download_cache'
+require 'java_buildpack/util/format_duration'
 
 module JavaBuildpack::Util
 
@@ -25,13 +27,9 @@ module JavaBuildpack::Util
   # <b>WARNING: This cache should only by used by code run by the +compile+ script</b>
   class ApplicationCache < DownloadCache
 
-    # Creates an instance that is configured to use the application cache.  The application cache location is defined by
-    # the second argument (<tt>ARGV[1]</tt>) to the +compile+ script.
-    #
-    # @raise if the second argument (<tt>ARGV[1]</tt>) to the +compile+ script is +nil+
     def initialize
       application_cache_directory = ARGV[1]
-      raise 'Application cache directory is undefined' if application_cache_directory.nil?
+      fail 'Application cache directory is undefined' if application_cache_directory.nil?
       super(application_cache_directory)
     end
 

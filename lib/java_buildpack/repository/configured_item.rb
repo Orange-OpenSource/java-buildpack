@@ -23,40 +23,48 @@ module JavaBuildpack::Repository
   # A class encapsulating details of a file stored in a versioned repository.
   class ConfiguredItem
 
-    # Finds an instance of the file based on the configuration.
+    # Finds an instance of the file based on the configuration and wraps any exceptions
+    # to identify the component.
     #
+    # @param [String] component_name the name of the component
     # @param [Hash] configuration the configuration
     # @option configuration [String] :repository_root the root directory of the repository
     # @option configuration [String] :version the version of the file to resolve
     # @param [Block, nil] version_validator an optional version validation block
     # @return [String] the URI of the chosen version of the file
     # @return [JavaBuildpack::Util::TokenizedVersion] the chosen version of the file
-    def self.find_item(configuration, &version_validator)
+    def self.find_item(component_name, configuration, &version_validator)
       repository_root = ConfiguredItem.repository_root(configuration)
       version = ConfiguredItem.version(configuration)
-      version_validator.call(version) if version_validator
+
+      yield version if block_given?
+
       index = ConfiguredItem.index(repository_root)
       index.find_item version
+    rescue => e
+      raise RuntimeError, "#{component_name} error: #{e.message}", e.backtrace
     end
+
+    private_class_method :new
 
     private
 
-      KEY_REPOSITORY_ROOT = 'repository_root'.freeze
+    KEY_REPOSITORY_ROOT = 'repository_root'.freeze
 
-      KEY_VERSION = 'version'.freeze
+    KEY_VERSION = 'version'.freeze
 
-      def self.index(repository_root)
-        RepositoryIndex.new(repository_root)
-      end
+    def self.index(repository_root)
+      RepositoryIndex.new(repository_root)
+    end
 
-      def self.repository_root(configuration)
-        raise "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository." unless configuration.key? KEY_REPOSITORY_ROOT
-        configuration[KEY_REPOSITORY_ROOT]
-      end
+    def self.repository_root(configuration)
+      fail "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository." unless configuration.key? KEY_REPOSITORY_ROOT
+      configuration[KEY_REPOSITORY_ROOT]
+    end
 
-      def self.version(configuration)
-        JavaBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
-      end
+    def self.version(configuration)
+      JavaBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
+    end
 
   end
 

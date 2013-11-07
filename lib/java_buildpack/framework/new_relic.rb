@@ -15,111 +15,61 @@
 # limitations under the License.
 
 require 'java_buildpack/framework'
-require 'java_buildpack/repository/configured_item'
-require 'java_buildpack/util/download'
+require 'java_buildpack/util/resource_utils'
+require 'java_buildpack/util/service_utils'
+require 'java_buildpack/versioned_dependency_component'
 
 module JavaBuildpack::Framework
 
-  # Encapsulates the detect, compile, and release functionality for enabling New Relic auto configuration.
-  class NewRelic
+  # Encapsulates the functionality for enabling zero-touch New Relic support.
+  class NewRelic < JavaBuildpack::VersionedDependencyComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [String] :app_dir the directory that the application exists in
-    # @option context [Array<String>] :java_opts an array that Java options can be added to
-    # @option context [Hash] :vcap_application The contents of the +VCAP_APPLICATION+ environment variable
-    # @option context [Hash] :vcap_services The contents of the +VCAP_SERVICES+ environment variable
-    # @option context [Hash] :configuration the properties provided by the user
-    def initialize(context = {})
-      @app_dir = context[:app_dir]
-      @java_opts = context[:java_opts]
-      @vcap_application = context[:vcap_application]
-      @vcap_services = context[:vcap_services]
-      @configuration = context[:configuration]
-      @version, @uri = NewRelic.find_new_relic_agent(@vcap_services, @configuration)
+    def initialize(context)
+      super('New Relic Agent', context)
     end
 
-    # Detects whether this application is suitable for New Relic
-    #
-    # @return [String] returns +new-relic-<version>+ if the application is a candidate for  New Relic otherwise returns
-    #                  +nil+
-    def detect
-      @version ? id(@version) : nil
-    end
-
-    # Downloads the Auto-reconfiguration JAR
-    #
-    # @return [void]
     def compile
-      system "rm -rf #{new_relic_home}"
-      system "mkdir -p #{new_relic_home}"
-      system "mkdir -p #{File.join new_relic_home, 'logs'}"
+      shell "rm -rf #{new_relic_home}"
+      shell "mkdir -p #{new_relic_home}"
+      shell "mkdir -p #{File.join new_relic_home, 'logs'}"
 
-      JavaBuildpack::Util.download(@version, @uri, 'New Relic Agent', jar_name(@version), new_relic_home)
-      copy_resources new_relic_home
+      download_jar jar_name, new_relic_home
+      JavaBuildpack::Util::ResourceUtils.copy_resources('new-relic', new_relic_home)
     end
 
-    # Adds configuration information to +JAVA_OPTS+
-    #
-    # @return [void]
     def release
-      @java_opts << "-javaagent:#{File.join NEW_RELIC_HOME, jar_name(@version)}"
+      @java_opts << "-javaagent:#{File.join NEW_RELIC_HOME, jar_name}"
       @java_opts << "-Dnewrelic.home=#{NEW_RELIC_HOME}"
-      @java_opts << "-Dnewrelic.config.license_key=#{NewRelic.license_key @vcap_services}"
+      @java_opts << "-Dnewrelic.config.license_key=#{license_key}"
       @java_opts << "-Dnewrelic.config.app_name='#{@vcap_application[NAME_KEY]}'"
       @java_opts << "-Dnewrelic.config.log_file_path=#{File.join NEW_RELIC_HOME, 'logs'}"
     end
 
+    protected
+
+    def supports?
+      JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)
+    end
+
     private
 
-      NAME_KEY = 'application_name'
+    NAME_KEY = 'application_name'.freeze
 
-      RESOURCES = File.join('..', '..', '..', 'resources', 'new-relic').freeze
+    NEW_RELIC_HOME = '.new-relic'.freeze
 
-      NEW_RELIC_HOME = '.new-relic'.freeze
+    SERVICE_NAME = /newrelic/.freeze
 
-      def copy_resources(new_relic_home)
-        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        system "cp -r #{File.join resources, '*'} #{new_relic_home}"
-      end
+    def jar_name
+      "#{@parsable_component_name}-#{@version}.jar"
+    end
 
-      def self.find_new_relic_agent(vcap_services, configuration)
-        if license_key(vcap_services)
-          version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration)
-        else
-          version = nil
-          uri = nil
-        end
+    def license_key
+      JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)['credentials']['licenseKey']
+    end
 
-        return version, uri # rubocop:disable RedundantReturn
-      end
-
-      def id(version)
-        "new-relic-#{version}"
-      end
-
-      def jar_name(version)
-        "#{id version}.jar"
-      end
-
-      def self.license_key(vcap_services)
-        license_key = nil
-
-        type = vcap_services.keys.find { |key| key =~ /newrelic/ }
-        if type
-          services = vcap_services[type]
-          fail "Only one New Relic service can be bound.  Found '#{services.length}'" if services.length != 1
-
-          license_key = services[0]['credentials']['licenseKey']
-        end
-
-        return license_key
-      end
-
-      def new_relic_home
-        File.join @app_dir, NEW_RELIC_HOME
-      end
+    def new_relic_home
+      File.join @app_dir, NEW_RELIC_HOME
+    end
 
   end
 

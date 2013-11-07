@@ -44,7 +44,7 @@ For example:
     cf set-env <app name> JBP_LOG_LEVEL DEBUG
 
 If `JBP_LOG_LEVEL` is not set, the default log level is read from the configuration in
-`config/logging.yml`.
+[`config/logging.yml`][].
 
 The logging levels in `JBP_LOG_LEVEL` and `config/logging.yml` may be
 specified using any mixture of upper and lower case.
@@ -53,3 +53,4 @@ Ruby's verbose and debug modes override the default log level to `DEBUG` unless
 `JBP_LOG_LEVEL` has been set, in which case this takes priority.
 
 [Configuration and Extension]: ../README.md#Configuration-and-Extension
+[`config/logging.yml`]: ../config/logging.yml

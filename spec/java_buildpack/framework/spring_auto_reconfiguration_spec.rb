@@ -37,17 +37,28 @@ module JavaBuildpack::Framework
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
 
       detected = SpringAutoReconfiguration.new(
-        app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_3',
-        configuration: {}
+          app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_3',
+          configuration: {}
       ).detect
 
-      expect(detected).to eq('spring-auto-reconfiguration-0.6.8')
+      expect(detected).to eq('spring-auto-reconfiguration=0.6.8')
+    end
+
+    it 'should detect with Spring JAR which has a long name' do
+      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
+
+      detected = SpringAutoReconfiguration.new(
+          app_dir: 'spec/fixtures/framework_auto_reconfiguration_long_spring_jar_name',
+          configuration: {}
+      ).detect
+
+      expect(detected).to eq('spring-auto-reconfiguration=0.6.8')
     end
 
     it 'should not detect without Spring JAR' do
       detected = SpringAutoReconfiguration.new(
-        app_dir: 'spec/fixtures/framework_none',
-        configuration: {}
+          app_dir: 'spec/fixtures/framework_none',
+          configuration: {}
       ).detect
 
       expect(detected).to be_nil
@@ -63,9 +74,9 @@ module JavaBuildpack::Framework
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
 
         SpringAutoReconfiguration.new(
-          app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_3',
-          lib_directory: lib_directory,
-          configuration: {}
+            app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_3',
+            lib_directory: lib_directory,
+            configuration: {}
         ).compile
 
         expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to be_true
@@ -88,9 +99,9 @@ module JavaBuildpack::Framework
         web_xml_modifier.stub(:to_s).and_return('Test Content')
 
         SpringAutoReconfiguration.new(
-          app_dir: root,
-          lib_directory: lib_directory,
-          configuration: {}
+            app_dir: root,
+            lib_directory: lib_directory,
+            configuration: {}
         ).compile
 
         File.open(web_xml) { |file| expect(file.read).to eq('Test Content') }
