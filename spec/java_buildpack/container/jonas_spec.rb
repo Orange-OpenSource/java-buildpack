@@ -147,7 +147,7 @@ module JavaBuildpack::Container
         jonas_base = File.join root, '.jonas_base'
         expect(File.exists?(jonas_base)).to be_true
 
-        diagnostic_file = File.join root, '.jonas_root', 'diagnostics', 'diagnostics.rb'
+        diagnostic_file = File.join root, '.jonas_root', 'diagnostics', 'launch_jonas_diags.rb'
         expect(File.exists?(diagnostic_file)).to be_true
 
         # Filtered out
@@ -178,7 +178,7 @@ module JavaBuildpack::Container
         configuration: {}
       ).release
 
-      diagnostic_cmd = '(ruby .jonas_root/diagnostics/diagnostics.rb & ); '
+      diagnostic_cmd = '(ruby .jonas_root/diagnostics/launch_jonas_diags.rb & ); '
       javaenv_cmd = 'JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" && ' +
                     'export JAVA_HOME JAVA_OPTS && '
       deployme_cmd = '(if test ! -d .jonas_base/deploy/app.war ; then ' +

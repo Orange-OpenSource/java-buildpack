@@ -74,7 +74,7 @@ module JavaBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
-      diagnostic_file = File.join JONAS_ROOT, "diagnostics", 'diagnostics.rb'
+      diagnostic_file = File.join JONAS_ROOT, "diagnostics", 'launch_jonas_diags.rb'
       diagnostics_cmd = "ruby #{diagnostic_file}"
       app_war_file = File.join JONAS_BASE, 'deploy' , 'app.war'
       if_jonas_base_exists_string = "(if test ! -d #{app_war_file} ; then"
