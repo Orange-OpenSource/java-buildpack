@@ -114,20 +114,31 @@ module JavaBuildpack::Util
 
       def download(filenames, uri)
         rich_uri = URI(uri)
+        if use_ssl?(rich_uri)
+          proxy = URI.parse(ENV['https_proxy'] || '')
+        else
+          proxy = URI.parse(ENV['http_proxy'] || '')
+        end
 
-        Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: use_ssl?(rich_uri)) do |http|
-          request = Net::HTTP::Get.new(uri)
+        @logger.debug { "HTTP.start(#{start_parameters(rich_uri)})" }
+
+        request = Net::HTTP::Get.new(rich_uri.request_uri)
+        Net::HTTP::Proxy(proxy.host, proxy.port).start(*start_parameters(rich_uri)) do |http|
           http.request request do |response|
             write_response(filenames, response)
           end
         end
 
-      rescue *HTTP_ERRORS
+      rescue *HTTP_ERRORS => e
         unless look_aside(filenames, uri)
           puts 'FAIL'
-          raise "Unable to download from #{uri}"
+          raise "Unable to download from #{uri} caught: #{e}"
         end
       end
+
+    def start_parameters(rich_uri)
+      return rich_uri.host, rich_uri.port, use_ssl: use_ssl?(rich_uri) # rubocop:disable RedundantReturn
+    end
 
       def filenames(uri)
         key = URI.escape(uri, '/')
