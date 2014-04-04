@@ -16,10 +16,10 @@
 # Configuration for the Jonas container
 ---
 version: 5.2.+
-repository_root: "http://orange-buildpacks-binaries.s3-website-us-west-1.amazonaws.com/jonas"
+repository_root: "http://10.203.6.18/jonas-buildpack-binaries/jonas/index.yml"
 support:
   version: 1.1.+
-  repository_root: "http://download.pivotal.io.s3.amazonaws.com/tomcat-buildpack-support/lucid/x86_64"
+  repository_root: "http://10.203.6.18/jonas-buildpack-binaries/tomcat-support/index.yml"
 deployme:
   version: 1.2.+
-  repository_root: "http://orange-buildpacks-binaries.s3-website-us-west-1.amazonaws.com/deployme"
+  repository_root: "http://10.203.6.18/jonas-buildpack-binaries/deployme/index.yml"
