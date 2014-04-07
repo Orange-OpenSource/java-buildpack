@@ -16,10 +16,10 @@
 # Configuration for the Jonas container
 ---
 version: 5.2.+
-repository_root: "http://10.203.6.18/jonas-buildpack-binaries/jonas/index.yml"
+repository_root: "http://10.203.6.18/jonas-buildpack-binaries/jonas"
 support:
   version: 1.1.+
-  repository_root: "http://10.203.6.18/jonas-buildpack-binaries/tomcat-support/index.yml"
+  repository_root: "http://10.203.6.18/jonas-buildpack-binaries/tomcat-support"
 deployme:
   version: 1.2.+
-  repository_root: "http://10.203.6.18/jonas-buildpack-binaries/deployme/index.yml"
+  repository_root: "http://10.203.6.18/jonas-buildpack-binaries/deployme"
